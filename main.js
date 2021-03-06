@@ -2462,7 +2462,7 @@ function updateAvailableUpgrades(active = false) {
     else if (game.upgrades.upgBarrels.locked && game.resources.water.current == game.resources.water.max && game.resources.wood.current >= 1) unlock("upgBarrels");
     else if (game.upgrades.upgShed.locked && game.resources.wood.current == game.resources.wood.max) unlock("upgShed");
     else if (game.upgrades.upgMasonry.locked && game.resources.stone.current >= 1) unlock("upgMasonry", "upgMineCart");
-    else if (game.upgrades.upgWaterDam.locked && game.resources.water.current >= 80) unlock("upgWaterDam");
+    else if (game.upgrades.upgWaterDam.locked && game.resources.water.current >= 60) unlock("upgWaterDam");
     else if (game.upgrades.upgIronBucket.locked && game.resources.iron.current >= 1) unlock("upgIronBucket", "upgIronAxe", "upgIronPickaxe");
     else if (game.upgrades.upgNourishment.locked && game.resources.wheat.current >= 15) unlock("upgNourishment", "upgIrrigation", "upgApprenticeship");
     else if (game.upgrades.upgJewelers.locked && game.resources.diamond.current >= 1) unlock("upgJewelers", "upgDiamondTrade", "upgDiamondBucket", "upgDiamondAxe", "upgDiamondPickaxe", "upgDiamondSickle");

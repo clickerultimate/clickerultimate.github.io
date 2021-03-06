@@ -559,7 +559,6 @@ hr {
 
 #pauseButton.pauseON {
     font-weight: bold;
-    background-color: red;
 }
 
 #pauseButton.pauseON:active {

@@ -2,14 +2,14 @@ function newGame() {
     var initData = {
         global: {
             version: "0.2.00",
-            latestChanges: "Added leader messages. Added various advancements/upgrades/leaders.",
+            latestChanges: "Published to github. Various QoL improvements.",
             start: new Date().getTime(),
             time: 0,
             speed: 10,
             isPaused: false,
             currentTooltip: "",
-            availableThemes: ["defaultTheme", "nightTheme", "crimsonTheme", "turtleTheme", "strikingTheme", "indigoTheme", "arcticTheme"],
-            themeNames: ["Default", "Quiet Night", "Crimson Sky", "Turtle", "Lightning Strike", "Indigo Rush", "Arctic Metal"],
+            availableThemes: ["defaultTheme", "nightTheme", "crimsonTheme", "turtleTheme", "strikingTheme", "indigoTheme", "arcticTheme", "victoryTheme"],
+            themeNames: ["Default", "Quiet Night", "Crimson Sky", "Turtle", "Lightning Strike", "Indigo Rush", "Arctic Metal", "Victory"],
             messages: [],
             unreadMessages: 0,
             lastTip: "",

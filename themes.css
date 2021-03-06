@@ -4,6 +4,7 @@
 /* https://www.color-hex.com/color-palette/12836 */
 body.defaultTheme {
     --color1: #000e24; /* Background */
+    --color1Alt: #000e24; /* Messages */
     --color2: #1b2c45; /* Container Background */
     --color2Contrast: gray; /* Resource Indicator Hover */
     --color3: #708090; /* Menu Buttons */
@@ -31,6 +32,7 @@ body.defaultTheme {
 /* https://www.color-hex.com/color-palette/80072 */
 body.nightTheme {
     --color1: #24080b;
+    --color1Alt: #24080b;
     --color2: #131930;
     --color2Contrast: white;
     --color3: #383851;
@@ -58,6 +60,7 @@ body.nightTheme {
 /* https://www.color-hex.com/color-palette/78993 */
 body.crimsonTheme {
     --color1: #980000;
+    --color1Alt: #980000;
     --color2: #292929;
     --color2Contrast: #c50303;
     --color3: #0b0000;
@@ -85,6 +88,7 @@ body.crimsonTheme {
 /* https://www.color-hex.com/color-palette/79073 */
 body.turtleTheme {
     --color1: #1c274f;
+    --color1Alt: #1c274f;
     --color2: #173d41;
     --color2Contrast: crimson;
     --color3: #14432c;
@@ -112,6 +116,7 @@ body.turtleTheme {
 /* https://www.color-hex.com/color-palette/80549 */
 body.strikingTheme {
     --color1: #1e3932;
+    --color1Alt: #1e3932;
     --color2: #663731;
     --color2Contrast: #1e3932;
     --color3: #1e3932;
@@ -139,6 +144,7 @@ body.strikingTheme {
 /* https://www.color-hex.com/color-palette/35377 */
 body.indigoTheme {
     --color1: #4a0082;
+    --color1Alt: #4a0082;
     --color2: #5d478b;
     --color2Contrast: lightblue;
     --color3: #3d59ab;
@@ -166,6 +172,7 @@ body.indigoTheme {
 /* https://www.color-hex.com/color-palette/83119 */
 body.arcticTheme {
     --color1: #333333;
+    --color1Alt: #333333;
     --color2: #444444;
     --color2Contrast: #00c8f8;
     --color3: #444444;
@@ -187,6 +194,33 @@ body.arcticTheme {
     --ribbonClicked: silver;
     --ribbonDisabled: black;
     --progressBar: #00b2dd;
+}
+
+/* Victory Theme */
+body.victoryTheme {
+    --color1: #AF1E2D;
+    --color1Alt: white;
+    --color2: #192168;
+    --color2Contrast: #AF1E2D;
+    --color3: #192168;
+    --color3Dark: #12184d;
+    --color4: white;
+    --color4Alt: white;
+    --color5: white;
+
+    --enabled: black;
+    --disabled: gray;
+    --clicked: silver;
+    --tooltip: white;
+    --tooltipText: #192168;
+    --tooltipContrast: #AF1E2D;
+    --tooltipBorder: #AF1E2D;
+    --buttons: lightgray;
+    --buttonsBorder: white;
+    --ribbon: #192168;
+    --ribbonClicked: #12184d;
+    --ribbonDisabled: gray;
+    --progressBar: #AF1E2D;
 }
 
 body {
@@ -303,10 +337,14 @@ hr {
 }
 
 .msgBlock {
-    color: var(--color1);
+    color: var(--color1Alt);
     border-color: var(--color5);
 }
 
 #mnuUnreadMessages {
     background-color: var(--color3Dark);
+}
+
+#pauseButton.pauseON {
+    background-color: var(--progressBar);
 }
