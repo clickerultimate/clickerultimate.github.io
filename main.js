@@ -13,6 +13,7 @@
 /*
 =TODO LIST=
 
+Add a "Remove" toggle for workers/buildings
 Gold needs to do more things
 Add more things to statistics section
 Add things to Achievements section

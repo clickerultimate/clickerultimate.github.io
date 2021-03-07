@@ -379,6 +379,7 @@ hr {
     height: calc(100% - 1.5vw - 31px);
     width: calc(100% - 2px);
     overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .mnuContentButton {
@@ -628,4 +629,9 @@ hr {
     width: calc(30vw - 5px);
     height: 20vh;
     font-size: 1vw;
+}
+
+::-webkit-scrollbar {
+    width: 0.5vw;
+    height: 1vh;
 }

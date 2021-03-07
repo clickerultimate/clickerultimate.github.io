@@ -348,3 +348,11 @@ hr {
 #pauseButton.pauseON {
     background-color: var(--progressBar);
 }
+
+::-webkit-scrollbar-thumb {
+    background: #888888;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555555;
+}
