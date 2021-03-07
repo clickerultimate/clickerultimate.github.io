@@ -1371,14 +1371,19 @@ function canAfford(what) {
  */
 function getEmpireName() {
     if (game.player.empireName) return game.player.empireName;
-
-    var prefixes = ["Greater *", "Upper *", "Lower *", "United *", "Northern *", "Southern *", "Eastern *", "Western *"];
-    var suffixes = ["Bavaria", "Germania", "Prussia", "Rome"];
-
+    var prefixes = ["Greater *", "Upper *", "Lower *", "United *", "Northern *", "Southern *", "Eastern *", "Western *", "Holy *n Empire", "*n Imperium", "State of *",
+        "Dominion of *", "Dutchy of *", "Republic of *", "*n Republic", "Kingdom of *", "*n Empire", "*n Dynasty", "*n Union", "*n Congregation", "*n Reign", "*n Reich",
+        "*n Commonwealth", "County of *", "Principality of *", "Central *", "Outer *", "*n Order", "*n Federation", "Independant *", "North *", "South *", "West *", "East *"];
+    var suffixes = ["Bavaria", "Germania", "Prussia", "Rome", "Austria", "Hungary", "Bulgaria", "Italy", "Germany", "Saxony", "Sicily", "Livonia", "Crimea", "Moldavia",
+        "Byzantium", "Ottoman", "Albania", "Anatolia", "Macedonia", "Galicia", "Québec", "Serbia", "Sparta", "Athens", "Thebes", "Caledonia", "Francia", "Angles", "Wessex",
+        "Russia", "Mongolia", "Macedonia", "Iberia", "Sumer", "Parthia", "Babylone", "Persia", "Assyria", "Egypt", "Spain", "America", "Akkad", "Arabia", "Cossackia"];
     var prefix = getRandom(prefixes);
     var suffix = getRandom(suffixes);
+    if (prefix.includes("*n")) {
+        suffix = adjective(suffix);
+        prefix = prefix.replace("*n", "*");
+    }
     var name = prefix.replace("*", suffix);
-
     game.player.empireName = name;
     return name;
 }
