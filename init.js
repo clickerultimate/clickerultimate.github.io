@@ -1,8 +1,8 @@
 function newGame() {
     var initData = {
         global: {
-            version: "0.2.00",
-            latestChanges: "Published to github. Various QoL improvements.",
+            version: "0.2.01",
+            latestChanges: "Now generating empire names! Including other minor adjustments and bug fixes.",
             start: new Date().getTime(),
             time: 0,
             speed: 10,
@@ -33,6 +33,7 @@ function newGame() {
             skipFirstUpg: true,
         },
         player: {
+            empireName: "",
             totalClicks: 0,
             settingsUnlocked: false,
             prestigeUnlocked: false,
@@ -3484,7 +3485,7 @@ function newGame() {
                 },
                 type: "age",
                 rate: 0.1,
-                effect: function () { advanceAge(this.name, 1); upgradeWorkerRate("lumberjack", this.rate); unlock("upgMining", "upgWoodCart", "advancements"); tutorialMessage("advancements"); tutorialMessage("ages"); },
+                effect: function () { advanceAge(this, 1); upgradeWorkerRate("lumberjack", this.rate); unlock("upgMining", "upgWoodCart", "advancements"); tutorialMessage("advancements"); tutorialMessage("ages"); },
                 locked: true,
                 bought: false
             },
@@ -3514,7 +3515,7 @@ function newGame() {
                     }
                 },
                 effect: function () {
-                    advanceAge(this.name, 1);
+                    advanceAge(this, 1);
                     unlock("iron", "sawmill", "stoneQuarry", "foundry", "upgStoneTap", "upgCasingWater", "upgCasingWood", "upgCasingStone", "upgCasingIron", "upgDeepDigging", "upgMonarchy", "upgVassalism");
                     upgradeWorkerRate("waterFetcher", this.waterRate);
                     upgradeWorkerRate("lumberjack", this.woodRate);
@@ -3559,7 +3560,7 @@ function newGame() {
                     }
                 },
                 effect: function () {
-                    advanceAge(this.name, 0);
+                    advanceAge(this, 0);
                     unlock("grainMill", "upgWheatTap", "upgCommerce", "upgScarcity", "upgMetalwork", "upgMotivation", "upgStoneStorage", "upgFarmhouses", "upgHarvest", "upgIronBasket", "upgLanterns");
                     upgradeMaxValue("waterP", this.waterMax);
                     upgradeMaxValue("woodP", this.woodMax);
@@ -3610,7 +3611,7 @@ function newGame() {
                     }
                 },
                 effect: function () {
-                    advanceAge(this.name, 2);
+                    advanceAge(this, 2);
                     unlock("reset", "prestige", "diamond", "trdDiamond", "jewelry", "upgSilverTap", "upgPrestigePoint", "upgAqueducts", "upgFineLumber", "upgHeavyMining", "upgBetterFoundries", "upgRestraint", "upgTreeCare", "upgFarmWork");
                     upgradeMaxValue("waterP", this.waterMax);
                     upgradeMaxValue("woodP", this.woodMax);
@@ -3657,7 +3658,7 @@ function newGame() {
                     }
                 },
                 effect: function () {
-                    advanceAge(this.name, 1);
+                    advanceAge(this, 1);
                     unlock("trdAdvancementPoint2");
                     buyPassive(getFromText("psvPumpingSystem"));
                     upgradeWorkerCost(this.workerIncrease);
@@ -4469,7 +4470,7 @@ function newGame() {
                 name: "ptgWoodMinimalism",
                 label: "Wood Minimalism",
                 type: "other",
-                description: function () { return "Reduces the workload of wood gathering through unconventional methods. Each level increases the minimum value possible of <b>Wood Progress</b> by <b>+" + this.rate + "</b>."; },
+                description: function () { return "Reduces the workload of wood gathering through unconventional methods. Each level increases the minimum threshold of <b>Wood Progress</b> by <b>+" + this.rate + "</b>."; },
                 rate: 1,
                 ptgCost: 1,
                 level: 0,
@@ -4521,7 +4522,7 @@ function newGame() {
                 name: "ptgStoneMinimalism",
                 label: "Stone Minimalism",
                 type: "other",
-                description: function () { return "Reduces the workload of stone gathering through unconventional methods. Each level increases the minimum value possible of <b>Stone Progress</b> by <b>+" + this.rate + "</b>."; },
+                description: function () { return "Reduces the workload of stone gathering through unconventional methods. Each level increases the minimum threshold of <b>Stone Progress</b> by <b>+" + this.rate + "</b>."; },
                 rate: 2,
                 ptgCost: 1,
                 level: 0,
@@ -4589,7 +4590,7 @@ function newGame() {
                 name: "ptgIronMinimalism",
                 label: "Iron Minimalism",
                 type: "other",
-                description: function () { return "Reduces the workload of iron gathering through unconventional methods. Each level increases the minimum value possible of <b>Iron Progress</b> by <b>+" + this.rate + "</b>."; },
+                description: function () { return "Reduces the workload of iron gathering through unconventional methods. Each level increases the minimum threshold of <b>Iron Progress</b> by <b>+" + this.rate + "</b>."; },
                 rate: 30,
                 ptgCost: 1,
                 level: 0,

@@ -25,7 +25,6 @@ Give messages with choice buttons
 Turn millers into bakers with new age
 Add setting to automatically purchase free upgrades
 Add leader dialog
-Some sort of naming system for colonies
 */
 
 /**
@@ -366,6 +365,8 @@ function message(content, type) {
  * @param {object} advancement The specific advancement purchased.
  */
 function leaderMessage(advancement) {
+    if (game.player.currentLeaders == 0) return;
+
     var leaderList = [];
     var favoringList = [];
     for (var ldr in game.leaders) {
@@ -378,6 +379,7 @@ function leaderMessage(advancement) {
             favoringList.push("unfavor");
         }
     }
+
     var i = Math.floor(Math.random() * leaderList.length);
     var leader = game.leaders[leaderList[i]];
     var favor = favoringList[i];
@@ -401,7 +403,7 @@ function leaderMessage(advancement) {
             "Our civilization didn't need <b>" + advancement.label + "</b> to prosper."
         ];
     }
-    var msg = leader.label + ": \"" + availableMessages[Math.floor(Math.random() * availableMessages.length)] + "\"";
+    var msg = leader.label + ": \"" + getRandom(availableMessages) + "\"";
     message(msg);
 }
 
@@ -441,7 +443,7 @@ function tutorialMessage(type) {
     var availableTypes = tutorialMessages.available;
     if (game.upgrades.upgLeaders.bought) availableTypes.push("leaders2", "leaders3");
     if (!item) {
-        do item = availableTypes[Math.floor(Math.random() * availableTypes.length)];
+        do item = getRandom(availableTypes);
         while (item == game.global.lastTip);
     }
     var msg = tutorialMessages[item];
@@ -1365,6 +1367,28 @@ function canAfford(what) {
 }
 
 /**
+ * Returns (or generates) the name of the current empire
+ */
+function getEmpireName() {
+    if (game.player.empireName) return game.player.empireName;
+    var prefixes = ["Greater *", "Upper *", "Lower *", "United *", "Northern *", "Southern *", "Eastern *", "Western *", "Holy *n Empire", "*n Imperium", "State of *",
+        "Dominion of *", "Dutchy of *", "Republic of *", "*n Republic", "Kingdom of *", "*n Empire", "*n Dynasty", "*n Union", "*n Congregation", "*n Reign", "*n Reich",
+        "*n Commonwealth", "County of *", "Principality of *", "Central *", "Outer *", "*n Order", "*n Federation", "Independant *", "North *", "South *", "West *", "East *"];
+    var suffixes = ["Bavaria", "Germania", "Prussia", "Rome", "Austria", "Hungary", "Bulgaria", "Italy", "Germany", "Saxony", "Sicily", "Livonia", "Crimea", "Moldavia",
+        "Byzantium", "Ottoman", "Albania", "Anatolia", "Macedonia", "Galicia", "Québec", "Serbia", "Sparta", "Athens", "Thebes", "Caledonia", "Francia", "Angles", "Wessex",
+        "Russia", "Mongolia", "Macedonia", "Iberia", "Sumer", "Parthia", "Babylone", "Persia", "Assyria", "Egypt", "Spain", "America", "Akkad", "Arabia", "Cossackia"];
+    var prefix = getRandom(prefixes);
+    var suffix = getRandom(suffixes);
+    if (prefix.includes("*n")) {
+        suffix = adjective(suffix);
+        prefix = prefix.replace("*n", "*");
+    }
+    var name = prefix.replace("*", suffix);
+    game.player.empireName = name;
+    return name;
+}
+
+/**
  * Returns the current total amount of workers.
  */
 function getAmountWorkers() {
@@ -1998,19 +2022,20 @@ function addPrestigeBlock(ptg) {
 /**
  * Unlocks all the advancements related to an age.
  * 
- * @param {string} age The specific age being unlocked.
+ * @param {object} age The specific age being unlocked.
  * @param {number} number The amount of Advancement Points to grant.
  */
 function advanceAge(age, number = 0) {
-    if (!age) return;
+    if (!age || !age.name) return;
     addAdvancementPoints(number);
     for (var adv in game.advancements) {
         var advancement = game.advancements[adv];
-        if (age != advancement.parent || advancement.secret) continue;
+        if (age.name != advancement.parent || advancement.secret) continue;
         unlock(adv);
     }
     updateAdvancementValues(true);
     updateStatistics();
+    message("Welcome to the <b>" + age.label + "</b>.");
 }
 
 /**
@@ -2381,6 +2406,7 @@ function lockStatistics() {
  * Displays the current Statistic values.
  */
 function updateStatistics() {
+    document.getElementById("mnuStatsCurrentName").innerHTML = getEmpireName();
     var age = getCurrentAge();
     document.getElementById("mnuStatsCurrentAge").innerHTML = age;
     if (age != "-") {

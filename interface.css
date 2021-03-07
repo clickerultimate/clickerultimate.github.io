@@ -540,7 +540,7 @@ hr {
 
 .ribbonButton {
     float: left;
-    border-width: 1px;
+    border-width: 2px 1px 0px 1px;
     border-style: solid;
     height: 100%;
     width: calc(10% - 2px);

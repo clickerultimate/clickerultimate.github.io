@@ -63,7 +63,7 @@ function GetPercent(number, total) {
 }
 
 /**
- * Returns the plural of a label if applicable
+ * Returns the plural of a label if applicable.
  * 
  * @param {object} what The type of object to label.
  */
@@ -81,4 +81,65 @@ function plural(what) {
         label += "s";
     }
     return label;
+}
+
+/**
+ * Returns the adjective of a label if applicable.
+ * 
+ * @param {string} what The word to adjectivize. 
+ */
+function adjective(what) {
+    var label = "";
+    if (!what) return label;
+    label += what;
+    if (label.endsWith("an") || label.endsWith("x")) {
+        return label;
+    } else if (label.endsWith("one")) {
+        label = label.slice(0, -1);
+        label += "ian";
+    } else if (label.endsWith("e")) {
+        label = label.slice(0, -1);
+        label += "an";
+    } else if (label.endsWith("r") || label.endsWith("t") || label.endsWith("d")) {
+        label += "ian";
+    } else if (label.endsWith("ny")) {
+        label = label.slice(0, -1);
+    } else if (label.endsWith("y")) {
+        label = label.slice(0, -1);
+        label += "ian";
+    } else if (label.endsWith("bec")) {
+        label += "ois";
+    } else if (label.endsWith("ns")) {
+        label = label.slice(0, -1);
+        label += "ian";
+    } else if (label.endsWith("les")) {
+        label = label.slice(0, -2);
+        label += "o";
+    } else if (label.endsWith("es")) {
+        label = label.slice(0, -2);
+        label += "an";
+    } else if (label.endsWith("um")) {
+        label = label.slice(0, -2);
+        label += "an";
+    } else if (label.endsWith("ncia")) {
+        label = label.slice(0, -3);
+        label += "kish";
+    } else if (label.endsWith("ain")) {
+        label = label.slice(0, -2);
+        label += "nish";
+    } else if (label.endsWith("golia") || label.endsWith("kia")) {
+        label = label.slice(0, -2);
+    } else {
+        label += "n";
+    }
+    return label;
+}
+
+/**
+ * Returns a random item from a provided list.
+ * 
+ * @param {Array} list 
+ */
+function getRandom(list) {
+    return list[Math.floor(Math.random() * list.length)];
 }
