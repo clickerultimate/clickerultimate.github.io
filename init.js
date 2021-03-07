@@ -1,7 +1,7 @@
 function newGame() {
     var initData = {
         global: {
-            version: "0.2.00",
+            version: "0.2.01",
             latestChanges: "Published to github. Various QoL improvements.",
             start: new Date().getTime(),
             time: 0,
@@ -33,6 +33,7 @@ function newGame() {
             skipFirstUpg: true,
         },
         player: {
+            empireName: "",
             totalClicks: 0,
             settingsUnlocked: false,
             prestigeUnlocked: false,
@@ -4469,7 +4470,7 @@ function newGame() {
                 name: "ptgWoodMinimalism",
                 label: "Wood Minimalism",
                 type: "other",
-                description: function () { return "Reduces the workload of wood gathering through unconventional methods. Each level increases the minimum value possible of <b>Wood Progress</b> by <b>+" + this.rate + "</b>."; },
+                description: function () { return "Reduces the workload of wood gathering through unconventional methods. Each level increases the minimum threshold of <b>Wood Progress</b> by <b>+" + this.rate + "</b>."; },
                 rate: 1,
                 ptgCost: 1,
                 level: 0,
@@ -4521,7 +4522,7 @@ function newGame() {
                 name: "ptgStoneMinimalism",
                 label: "Stone Minimalism",
                 type: "other",
-                description: function () { return "Reduces the workload of stone gathering through unconventional methods. Each level increases the minimum value possible of <b>Stone Progress</b> by <b>+" + this.rate + "</b>."; },
+                description: function () { return "Reduces the workload of stone gathering through unconventional methods. Each level increases the minimum threshold of <b>Stone Progress</b> by <b>+" + this.rate + "</b>."; },
                 rate: 2,
                 ptgCost: 1,
                 level: 0,
@@ -4589,7 +4590,7 @@ function newGame() {
                 name: "ptgIronMinimalism",
                 label: "Iron Minimalism",
                 type: "other",
-                description: function () { return "Reduces the workload of iron gathering through unconventional methods. Each level increases the minimum value possible of <b>Iron Progress</b> by <b>+" + this.rate + "</b>."; },
+                description: function () { return "Reduces the workload of iron gathering through unconventional methods. Each level increases the minimum threshold of <b>Iron Progress</b> by <b>+" + this.rate + "</b>."; },
                 rate: 30,
                 ptgCost: 1,
                 level: 0,

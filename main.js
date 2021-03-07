@@ -25,7 +25,6 @@ Give messages with choice buttons
 Turn millers into bakers with new age
 Add setting to automatically purchase free upgrades
 Add leader dialog
-Some sort of naming system for colonies
 */
 
 /**
@@ -366,6 +365,8 @@ function message(content, type) {
  * @param {object} advancement The specific advancement purchased.
  */
 function leaderMessage(advancement) {
+    if (game.player.currentLeaders == 0) return;
+
     var leaderList = [];
     var favoringList = [];
     for (var ldr in game.leaders) {
@@ -378,6 +379,7 @@ function leaderMessage(advancement) {
             favoringList.push("unfavor");
         }
     }
+
     var i = Math.floor(Math.random() * leaderList.length);
     var leader = game.leaders[leaderList[i]];
     var favor = favoringList[i];
@@ -401,7 +403,7 @@ function leaderMessage(advancement) {
             "Our civilization didn't need <b>" + advancement.label + "</b> to prosper."
         ];
     }
-    var msg = leader.label + ": \"" + availableMessages[Math.floor(Math.random() * availableMessages.length)] + "\"";
+    var msg = leader.label + ": \"" + getRandom(availableMessages) + "\"";
     message(msg);
 }
 
@@ -441,7 +443,7 @@ function tutorialMessage(type) {
     var availableTypes = tutorialMessages.available;
     if (game.upgrades.upgLeaders.bought) availableTypes.push("leaders2", "leaders3");
     if (!item) {
-        do item = availableTypes[Math.floor(Math.random() * availableTypes.length)];
+        do item = getRandom(availableTypes);
         while (item == game.global.lastTip);
     }
     var msg = tutorialMessages[item];
@@ -1362,6 +1364,23 @@ function canAfford(what) {
     if (game.player.gold < what.goldCost) return false;
     if (game.player.prestigePoints < what.ptgCost) return false;
     return true;
+}
+
+/**
+ * Returns (or generates) the name of the current empire
+ */
+function getEmpireName() {
+    if (game.player.empireName) return game.player.empireName;
+
+    var prefixes = ["Greater *", "Upper *", "Lower *", "United *", "Northern *", "Southern *", "Eastern *", "Western *"];
+    var suffixes = ["Bavaria", "Germania", "Prussia", "Rome"];
+
+    var prefix = getRandom(prefixes);
+    var suffix = getRandom(suffixes);
+    var name = prefix.replace("*", suffix);
+
+    game.player.empireName = name;
+    return name;
 }
 
 /**
@@ -2381,6 +2400,7 @@ function lockStatistics() {
  * Displays the current Statistic values.
  */
 function updateStatistics() {
+    document.getElementById("mnuStatsCurrentName").innerHTML = getEmpireName();
     var age = getCurrentAge();
     document.getElementById("mnuStatsCurrentAge").innerHTML = age;
     if (age != "-") {

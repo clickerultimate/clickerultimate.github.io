@@ -82,3 +82,12 @@ function plural(what) {
     }
     return label;
 }
+
+/**
+ * Returns a random item from a provided list.
+ * 
+ * @param {Array} list 
+ */
+function getRandom(list) {
+    return list[Math.floor(Math.random() * list.length)];
+}
