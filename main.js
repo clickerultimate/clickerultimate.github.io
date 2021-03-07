@@ -2022,19 +2022,20 @@ function addPrestigeBlock(ptg) {
 /**
  * Unlocks all the advancements related to an age.
  * 
- * @param {string} age The specific age being unlocked.
+ * @param {object} age The specific age being unlocked.
  * @param {number} number The amount of Advancement Points to grant.
  */
 function advanceAge(age, number = 0) {
-    if (!age) return;
+    if (!age || !age.name) return;
     addAdvancementPoints(number);
     for (var adv in game.advancements) {
         var advancement = game.advancements[adv];
-        if (age != advancement.parent || advancement.secret) continue;
+        if (age.name != advancement.parent || advancement.secret) continue;
         unlock(adv);
     }
     updateAdvancementValues(true);
     updateStatistics();
+    message("Welcome to the <b>" + age.label + "</b>.");
 }
 
 /**
