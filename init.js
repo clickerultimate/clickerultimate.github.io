@@ -31,6 +31,7 @@ function newGame() {
             messagesSize: "Normal",
             tooltipMode: "Detailed",
             skipFirstUpg: true,
+            hardResetExposed: false
         },
         player: {
             empireName: "",

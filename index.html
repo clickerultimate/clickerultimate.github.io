@@ -212,8 +212,10 @@
                                 Beginning</span></div>
                         <div class="mnuContentButton button clickable" onclick="toggleDefaultMenu()">
                             Change Default Menu</div>
-                        <div class="mnuContentInfo">On Load: <span id="mnuCurrentDefaultMenu">Keep Last Tab</span>
-                        </div>
+                        <div class="mnuContentInfo">On Load: <span id="mnuCurrentDefaultMenu">Keep Last Tab</span></div>
+                        <div class="mnuContentButton button clickable" onclick="toggleDeleteSave()">
+                            Toggle Hard Reset Option</div>
+                        <div class="mnuContentInfo">Delete Save Button: <span id="mnuCurrentDeleteSave">Hidden</span></div>
                     </div>
                 </div>
             </div>
@@ -232,8 +234,7 @@
         <div id="importButton" class="ribbonButton button" onclick="toggleImport()">
             <span>Import Save</span>
         </div>
-        <div class="ribbonButton button">
-            <!-- TODO: Add menu item -->
+        <div id="deleteSaveButton" class="ribbonButton button">
         </div>
         <div class="ribbonButton button">
             <!-- TODO: Add menu item -->

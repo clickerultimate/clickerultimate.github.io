@@ -133,6 +133,30 @@ function toggleImport() {
 }
 
 /**
+ * Hides/exposes the delete save button.
+ */
+function toggleDeleteSave() {
+    game.settings.hardResetExposed = !game.settings.hardResetExposed;
+    updateDeleteSaveSetting();
+    if (game.settings.hardResetExposed) message("The Delete Save button is now exposed in the bottom ribbon.", "warning");
+}
+
+/**
+ * Updates the interface according to the hard reset setting.
+ */
+function updateDeleteSaveSetting() {
+    document.getElementById("mnuCurrentDeleteSave").innerHTML = (game.settings.hardResetExposed ? "Exposed" : "Hidden");
+
+    if (game.settings.hardResetExposed) {
+        document.getElementById("deleteSaveButton").innerHTML = "<span>Delete Save</span>";
+        document.getElementById("deleteSaveButton").onclick = function() { tooltip("delete"); };
+    } else {
+        document.getElementById("deleteSaveButton").innerHTML = "";
+        document.getElementById("deleteSaveButton").onclick = undefined;
+    }
+}
+
+/**
  * Enables and disabled tutorial messages/tips.
  */
 function toggleTutorial() {
@@ -2308,6 +2332,7 @@ function updateInterface() {
     updateMsgFontSize();
     updateTooltipMode();
     updateDefaultMenu();
+    updateDeleteSaveSetting();
     updateStatistics();
 }
 
@@ -2920,6 +2945,15 @@ function copyExport() {
 }
 
 /**
+ * Deletes the current save and resets the game.
+ */
+function deleteSave() {
+    localStorage.removeItem("ClickerUltisvg");
+    localStorage.removeItem("theme");
+    location.reload();
+}
+
+/**
  * Shows/hides the tooltip modal based on a provided instruction.
  * 
  * @param {string} what Name of the object to display.
@@ -2941,17 +2975,22 @@ function tooltip(what = "hide", event = null, repositionTooltip = true) {
     var bottomText = "Bottom";
 
     if (what == "pause") {
-        titleText = "PAUSED"
-        mainText = "Your game is paused. Click the \"Unpause\" button to resume."
-        bottomText = "<div class=\"mdButton mdRed button\" onclick=\"togglePause()\"><span>Unpause</span></div>"
+        titleText = "PAUSED";
+        mainText = "Your game is paused. Click the \"Unpause\" button to resume.";
+        bottomText = "<div class=\"mdButton mdRed button\" onclick=\"togglePause()\"><span>Unpause</span></div>";
     } else if (what == "export") {
         titleText = "Export"
         mainText = "Copy/Paste the following text to import your game:<textarea id=\"exportText\" class=\"mdTextArea\" disabled>" + save(true) + "</textarea>";
-        bottomText = "<div class=\"mdButton mdGreen button\" onclick=\"copyExport()\">Copy to Clipboard</div><div class=\"mdButton mdGray button\" onclick=\"toggleExport()\"><span>Close</span></div>"
+        bottomText = "<div class=\"mdButton mdGreen button\" onclick=\"copyExport()\">Copy to Clipboard</div><div class=\"mdButton mdGray button\" onclick=\"toggleExport()\"><span>Close</span></div>";
     } else if (what == "import") {
-        titleText = "Import"
-        mainText = "Paste the export string here:<textarea id=\"importText\" class=\"mdTextArea\"></textarea>"
-        bottomText = "<div class=\"mdButton mdGreen button\" onclick=\"importLoad()\">Load</div><div class=\"mdButton mdGray button\" onclick=\"toggleImport()\">Close</div>"
+        titleText = "Import";
+        mainText = "Paste the export string here:<textarea id=\"importText\" class=\"mdTextArea\"></textarea>";
+        bottomText = "<div class=\"mdButton mdGreen button\" onclick=\"importLoad()\">Load</div><div class=\"mdButton mdGray button\" onclick=\"toggleImport()\">Close</div>";
+    } else if (what ==="delete") {
+        titleText = "Delete Save";
+        mainText = "Delete your save and reset the game? (This cannot be undone)";
+        bottomText = "<div class=\"mdButton mdRed button\" onclick=\"deleteSave()\">Yes</div><div class=\"mdButton mdGray button\" onclick=\"tooltip()\">Cancel</div>";
+        updateModalBackground(false, true);
     } else if (what == "colony") {
         var advPts = prettify(game.player.advancementPoints + game.player.nextAdvancementPoints + (game.prestiges.ptgAdvanced.level * game.prestiges.ptgAdvanced.rate), 0, true);
         var ptgPts = prettify(game.player.prestigePoints + game.player.nextPrestigePoints, 0, true);
