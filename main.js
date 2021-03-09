@@ -12,8 +12,6 @@
 
 /*
 =TODO LIST=
-
-Add a "Remove" toggle for workers/buildings
 Gold needs to do more things
 Add more things to statistics section
 Add things to Achievements section
@@ -361,6 +359,35 @@ function message(content, type) {
 }
 
 /**
+ * A leader is hired and greets the player.
+ * 
+ * @param {object} leader The hired leader.
+ */
+function leaderGreeting(leader) {
+    if (!leader) return;
+    var messages = [];
+    var empire = getEmpireLabel();
+    var Empire = getEmpireLabel(true);
+
+    switch (leader.personality) {
+        case "wise":
+            messages = ["Do you seek my counsel? Very well...", "May we help " + empire + " prosper.", "I foresaw our meeting in a dream.",
+                "Wise of you to heed my counsel, lord.", Empire + " is destined for greatness with me at your side.", "Long may you reign over " + empire + "."];
+            break;
+        case "stern":
+            messages = ["Out with it.", "For " + empire + "!", "Godspeed.", "Your orders?", "For victory." , "Hail.", "My liege.", "None can stand before us."];
+            break;
+        case "pious":
+            messages = ["May God grant us victory.", "God watches over us.", "By the grace of God.", "We shall strive to earn God's favor."]
+            break;
+        default:
+            messages = ["Hail, monarch.", "Well met.", "Salutations.", "My regards."];
+    }
+
+    message("<b>" + leader.label + "</b>: \"" + getRandom(messages) + "\"");
+}
+
+/**
  * One of the player's hired leaders sends a message to the player.
  * @param {object} advancement The specific advancement purchased.
  */
@@ -369,6 +396,8 @@ function leaderMessage(advancement) {
 
     var leaderList = [];
     var favoringList = [];
+    var empire = getEmpireLabel();
+    var Empire = getEmpireLabel(true);
     for (var ldr in game.leaders) {
         if (!game.leaders[ldr].bought) continue;
         if (game.leaders[ldr].favored && game.leaders[ldr].favored.includes(advancement.name)) {
@@ -389,9 +418,9 @@ function leaderMessage(advancement) {
     if (favor == "favor") {
         availableMessages = [
             "<b>" + advancement.label + "</b> should prove useful later on.",
-            "Our civilization will be remembered for its <b>" + advancement.label + "</b>.",
+            Empire + " will be remembered for its <b>" + advancement.label + "</b>.",
             "Aah, <b>" + advancement.label + "</b>! A wise choice.",
-            "I believe <b>" + advancement.label + "</b> will play an important role in our civilization.",
+            "I believe <b>" + advancement.label + "</b> will play an important role in " + empire + ".",
             "<b>" + advancement.label + "</b> will change the course of history for the better."
         ];
     } else {
@@ -400,10 +429,10 @@ function leaderMessage(advancement) {
             "Was <b>" + advancement.label + "</b> really a wise investment?.",
             "<b>" + advancement.label + "</b> clearly was not worth the advancement points.",
             "I think there were better advancements to research than <b>" + advancement.label + "</b>.",
-            "Our civilization didn't need <b>" + advancement.label + "</b> to prosper."
+            Empire + " doesn't need <b>" + advancement.label + "</b> to prosper."
         ];
     }
-    var msg = leader.label + ": \"" + getRandom(availableMessages) + "\"";
+    var msg = "<b>" + leader.label + "</b>: \"" + getRandom(availableMessages) + "\"";
     message(msg);
 }
 
@@ -953,6 +982,7 @@ function buyLeader(leader) {
     leader.bought = true;
     game.player.currentLeaders++;
     updateLeaderValues(leader, true);
+    leaderGreeting(leader);
 }
 
 
@@ -1379,12 +1409,30 @@ function getEmpireName() {
         "Russia", "Mongolia", "Macedonia", "Iberia", "Sumer", "Parthia", "Babylone", "Persia", "Assyria", "Egypt", "Spain", "America", "Akkad", "Arabia", "Cossackia"];
     var prefix = getRandom(prefixes);
     var suffix = getRandom(suffixes);
+    var hasPrefix = false;
     if (prefix.includes("*n")) {
         suffix = adjective(suffix);
         prefix = prefix.replace("*n", "*");
+        hasPrefix = true;
     }
     var name = prefix.replace("*", suffix);
     game.player.empireName = name;
+    game.player.empirePrefix = hasPrefix;
+    return name;
+}
+
+/**
+ * Returns the full name of the empire, with a prefix if applicable.
+ * 
+ * @param {boolean} capitalize Whether to capitalize the prefix if applicable.
+ */
+function getEmpireLabel(capitalize = false) {
+    var name = "";
+    if (game.player.empirePrefix) {
+        if (capitalize) name += "The ";
+        else name += "the ";
+    }
+    name += game.player.empireName;
     return name;
 }
 
@@ -2026,7 +2074,7 @@ function addPrestigeBlock(ptg) {
  * @param {number} number The amount of Advancement Points to grant.
  */
 function advanceAge(age, number = 0) {
-    if (!age || !age.name) return;
+    if (!age || !age.name) return;
     addAdvancementPoints(number);
     for (var adv in game.advancements) {
         var advancement = game.advancements[adv];
@@ -2035,7 +2083,7 @@ function advanceAge(age, number = 0) {
     }
     updateAdvancementValues(true);
     updateStatistics();
-    message("Welcome to the <b>" + age.label + "</b>.");
+    message(getEmpireLabel(true) + " has entered the <b>" + age.label + "</b>.");
 }
 
 /**
@@ -2232,6 +2280,7 @@ function prestigeReset() {
         clickBuy("upgLeaders");
         unlock.apply(this, leadersList);
     }
+    message("A new colony was built: <b>" + game.player.empireName + "</b>.");
 }
 
 /**
@@ -2613,13 +2662,16 @@ function updatePrestigeValues(active = false) {
         ptgIndicator.textContent = prestige.level + "/" + prestige.maxLevel;
         if (prestige.bought) {
             ptgButton.classList.replace("clickable", "unclickable");
-            ptgButton.classList.add("advBought");
+            ptgButton.classList.remove("ptgInProgress");
+            ptgButton.classList.add("ptgBought");
             continue;
         }
         if (canAfford(prestige)) {
             if (ptgButton.classList.contains("unclickable")) ptgButton.classList.replace("unclickable", "clickable");
+            ptgButton.classList.remove("ptgInProgress");
         } else {
             if (ptgButton.classList.contains("clickable")) ptgButton.classList.replace("clickable", "unclickable");
+            if (prestige.level > 0) ptgButton.classList.add("ptgInProgress");
         }
     }
 }

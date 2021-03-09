@@ -317,6 +317,17 @@ hr {
     border-color: gold;
 }
 
+.jbButton.ptgBought {
+    background-color: darkblue;
+    border-color: gold;
+    border-style: dotted;
+    color: gold;
+}
+
+.jbButton.ptgBought .jbIndicator {
+    border-color: gold;
+}
+
 /* Settings-Related interface */
 #MenuArea {
     width: calc(50vw - 30px);

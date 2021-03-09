@@ -308,6 +308,10 @@ hr {
     border-color: var(--buttonsBorder);
 }
 
+.ptgInProgress .jbIndicator {
+    color: var(--enabled);
+}
+
 .jbIndicator {
     border-color: var(--buttonsBorder);
 }

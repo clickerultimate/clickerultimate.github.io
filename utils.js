@@ -108,7 +108,8 @@ function adjective(what) {
         label = label.slice(0, -1);
         label += "ian";
     } else if (label.endsWith("bec")) {
-        label += "ois";
+        label = label.slice(0, -2);
+        label += "écois";
     } else if (label.endsWith("ns")) {
         label = label.slice(0, -1);
         label += "ian";
