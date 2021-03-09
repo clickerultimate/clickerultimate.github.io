@@ -13,7 +13,6 @@
 /*
 =TODO LIST=
 Gold needs to do more things
-Add more things to statistics section
 Add things to Achievements section
 Achievements to have some sort of benefit
 Add more items to the tutorial
@@ -22,7 +21,6 @@ Fix Equestrianism
 Give messages with choice buttons
 Turn millers into bakers with new age
 Add setting to automatically purchase free upgrades
-Add leader dialog
 */
 
 /**
@@ -1079,6 +1077,30 @@ function buyPassive(passive) {
         recalculateResRate(resource);
         updateResRateValues(resource, true);
     }
+}
+
+/**
+ * Unlocks an achievement for the player.
+ * 
+ * @param {string} ach The name of the achievement being unlocked.
+ */
+function achieve(ach) {
+    var achievement = getFromText(ach);
+    if (!achievement || !achievement.label || achievement.achieved) return;
+    document.getElementById("achLabel").innerHTML = achievement.label;
+    achievement.hidden = false;
+    achievement.achieved = true;
+    game.player.achievementPoints += achievement.points;
+
+    document.getElementById("achievementContainer").style.opacity = 100;
+    setTimeout(hideAchievement, 3000);
+    //TODO
+    //update achievement points counter
+    //update achievements
+}
+
+function hideAchievement() {
+    document.getElementById("achievementContainer").style.opacity = 0;
 }
 
 /**

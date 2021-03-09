@@ -54,6 +54,7 @@ function newGame() {
             taxPassiveGold: 0,
             prestigePoints: 0,
             nextPrestigePoints: 0,
+            achievementPoints: 0,
             autoClick: 0,
             doubleClick: 0,
             convertPrestiges: 0,

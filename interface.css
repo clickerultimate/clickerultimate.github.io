@@ -90,6 +90,11 @@ hr {
     border-top-width: 1px;
   }
 
+  ::-webkit-scrollbar {
+    width: 0.5vw;
+    height: 1vh;
+}
+
 /* Resource-related interface */
 #ResourcesArea {
     width: calc(50vw - 30px);
@@ -642,7 +647,35 @@ hr {
     font-size: 1vw;
 }
 
-::-webkit-scrollbar {
-    width: 0.5vw;
-    height: 1vh;
+#achievementContainer {
+    position: fixed;
+    background-color: black;
+    color: white;
+    left: 50%;
+    bottom: 10%;
+    line-height: 1vw;
+    font-size: 1vw;
+    white-space: nowrap;
+    transform: translate(-50%, 0);
+    text-align: center;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 4px 4px 5px 0px #1f1f1f;
+    opacity: 0;
+    transition: 1s;
+}
+
+#achievementContainer span {
+    display: block;
+    height: 1vw;
+}
+
+#achIndicator {
+    margin-bottom: 4%;
+    padding-bottom: 2%;
+    border-bottom: 1px dotted gold;
+}
+
+#achLabel {
+    font-size: 0.9vw;
 }
