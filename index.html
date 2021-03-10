@@ -25,7 +25,7 @@
 
     <link rel="stylesheet" href="./interface.css">
     <link rel="stylesheet" href="./themes.css">
-    <link rel="icon" href="./favicon.ico">
+    <link rel="icon" href="./icon.ico">
 
     <script type="text/javascript" src="./lzstring.js" defer></script>
     <script type="text/javascript" src="./init.js" defer></script>
@@ -153,6 +153,8 @@
                     <div id="AchievementsContainer" class="mnuContainer">
                         <!-- Insert achievements here -->
                     </div>
+                    <div class="achPointsLabel">Current Achievement Points: <div id="achCurrentPoints">0</div>
+                    </div>
                 </div>
                 <div id="PrestigeArea" class="mnuArea locked">
                     <div class="mnuTitle">Prestige</div>
@@ -253,7 +255,10 @@
             <span id="pauseLabel">Pause</span>
         </div>
     </div>
-    <div id="achievementContainer">
+    <div id="achievementPill" onclick="hideAchievement()">
+        <div class="left">
+            <span id="achPoints">0</span>
+        </div>
         <span id="achIndicator">Achievement Unlocked</span>
         <span id="achLabel">-</span>
     </div>

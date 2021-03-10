@@ -284,6 +284,10 @@ hr {
     line-height: 2vw;
 }
 
+.jbBlock.achBlock {
+    width: calc(33% - 10px);
+}
+
 /* Advancement-Related Interface */
 #AdvancementsArea {
     width: calc(50vw - 30px);
@@ -312,7 +316,8 @@ hr {
     user-select: none;
 }
 
-.jbButton.advBought {
+.jbButton.advBought,
+.jbButton.achAchieved {
     background-color: darkblue;
     border-color: darkblue;
     color: gold;
@@ -424,7 +429,8 @@ hr {
     margin-bottom: 5px;
 }
 
-#PrestigeContainer {
+#PrestigeContainer,
+#AchievementsContainer {
     height: calc(100% - 3vw - 34px);
     padding-bottom: 5px;
 }
@@ -444,7 +450,8 @@ hr {
     white-space: nowrap;
 }
 
-.ptgColonyLabel {
+.ptgColonyLabel,
+.achPointsLabel {
     float: right;
     width:50%;
     text-align: right;
@@ -453,7 +460,8 @@ hr {
     padding: 1px;
 }
 
-.ptgColonyLabel div {
+.ptgColonyLabel div,
+.achPointsLabel div {
     display: inline;
 }
 
@@ -647,7 +655,7 @@ hr {
     font-size: 1vw;
 }
 
-#achievementContainer {
+#achievementPill {
     position: fixed;
     background-color: black;
     color: white;
@@ -659,21 +667,42 @@ hr {
     transform: translate(-50%, 0);
     text-align: center;
     padding: 10px;
-    border-radius: 10px;
     box-shadow: 4px 4px 5px 0px #1f1f1f;
     opacity: 0;
     transition: 1s;
+    padding-left: 4vw;
+    border: 1px solid #333333;
+    border-radius: 2.5vw 10px 10px 2.5vw;
+    padding-right: 1vw;
+    user-select: none;
 }
 
-#achievementContainer span {
+#achievementPill span {
     display: block;
     height: 1vw;
 }
 
+#achievementPill .left {
+    width: 2.5vw;
+    height: 2.5vw;
+    position: fixed;
+    left: 0.5vw;
+    top: 2vh;
+    border-radius: 100%;
+    border: 2px dotted gold;
+}
+
+#achPoints {
+    line-height: 2vw;
+    font-size: 2vw;
+    padding-top: 0.25vw;
+}
+
 #achIndicator {
-    margin-bottom: 4%;
-    padding-bottom: 2%;
-    border-bottom: 1px dotted gold;
+    margin-bottom: 2vh;
+    padding-bottom: 1vh;
+    border-bottom: 2px dotted gold;
+    color: gold;
 }
 
 #achLabel {

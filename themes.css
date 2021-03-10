@@ -251,6 +251,7 @@ body {
 .mnuStatsLabel,
 .mnuStatsInfo,
 .ptgColonyLabel,
+.achPointsLabel,
 .vrTitle,
 .vrContent {
     color: var(--color5);

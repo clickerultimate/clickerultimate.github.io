@@ -2,7 +2,7 @@ function newGame() {
     var initData = {
         global: {
             version: "0.2.02",
-            latestChanges: "Now generating empire names! Including other minor adjustments and bug fixes.",
+            latestChanges: "Achievements were implemented. Added a hard reset button. Other quality of life changes.",
             start: new Date().getTime(),
             time: 0,
             speed: 10,
@@ -4664,10 +4664,108 @@ function newGame() {
             }
         },
         achievements: {
-            achTest: {
-                name: "achTest",
-                label: "Test",
-                description: function () { return "Just a test achievement"; },
+            achColonist: {
+                name: "achColonist",
+                label: "Colonist",
+                description: function () { return "You ventured and built your first the <b>Colony</b>."; },
+                points: 2,
+                hidden: true,
+                achieved: false
+            },
+            achCaveman: {
+                name: "achCaveman",
+                label: "Caveman",
+                description: function () { return "You reached the <b>Stone Age</b> after banging some stones together. Very impressive."; },
+                points: 0,
+                hidden: true,
+                achieved: false
+            },
+            achLord: {
+                name: "achLord",
+                label: "Lord",
+                description: function () { return "You reached the <b>Feudal Age</b>. Mercy mild upon your kingdom."; },
+                points: 1,
+                hidden: true,
+                achieved: false
+            },
+            achDarkTimes: {
+                name: "achDarkTimes",
+                label: "Dark Times",
+                fullLabel: "Dark Times Ahead...",
+                description: function () { return "Oh brave one, you have reached the <b>Dark Age</b>. Best of luck in this upcoming trial."; },
+                points: 1,
+                hidden: true,
+                achieved: false
+            },
+            achScholar: {
+                name: "achScholar",
+                label: "Scholar",
+                description: function () { return "You lead your realm to the age of the <b>Renaissance</b>. You should be proud."; },
+                points: 1,
+                hidden: true,
+                achieved: false
+            },
+            achThirsty: {
+                name: "achThirsty",
+                label: "Thirsty",
+                description: function () { return "Acquire your first <b>Water Fetcher</b>."; },
+                points: 0,
+                hidden: false,
+                achieved: false
+            },
+            achHungry: {
+                name: "achHungry",
+                label: "Hungry",
+                description: function () { return "Hire your first <b>Farmer</b>."; },
+                points: 0,
+                hidden: false,
+                achieved: false
+            },
+            achCraven: {
+                name: "achCraven",
+                label: "Craven",
+                description: function () { return "Hire your first <b>Miner</b> without having a single <b>Water Fetcher</b> or <b>Lumberjack</b> under your employ. Why would you do this?"; },
+                points: 1,
+                hidden: false,
+                achieved: false
+            },
+            achLight: {
+                name: "achLight",
+                label: "Light",
+                fullLabel: "Let There Be Light",
+                description: function () { return "Discover <b>Fire</b>."; },
+                points: 0,
+                hidden: false,
+                achieved: false
+            },
+            achMasonry: {
+                name:"achMasonry",
+                label: "Going Somewhere",
+                description: function () { return "Research <b>Masonry</b>. Time to get serious."; },
+                points: 1,
+                hidden: false,
+                achieved: false
+            },
+            achTrader: {
+                name:"achTrader",
+                label: "Trader",
+                description: function () { return "Research <b>Economics</b>. What are these shiny metals for anyway?"; },
+                points: 0,
+                hidden: false,
+                achieved: false
+            },
+            achPureGreed: {
+                name:"achPureGreed",
+                label: "Pure Greed",
+                description: function () { return "You conducted a <b>Tax</b> for a profit of <b>0 Gold</b> (before passive increases). Stop this madness."; },
+                points: 1,
+                hidden: true,
+                achieved: false
+            },
+            achMetalCaster: {
+                name:"achMetalCaster",
+                label: "Metal Caster",
+                description: function () { return "Build your first <b>Foundry</b>. Do you see where this is heading?"; },
                 points: 1,
                 hidden: false,
                 achieved: false
