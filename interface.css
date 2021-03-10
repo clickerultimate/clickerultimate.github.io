@@ -311,15 +311,18 @@ hr {
     font-size: 1.2vw;
 }
 
-.jbButton.advBought,
-.jbButton.achAchieved {
+.jbButton.advBought {
     background-color: darkblue;
     border-color: darkblue;
     color: gold;
 }
 
-.jbButton.advBought .jbIndicator {
-    border-color: gold;
+.jbButton.achButton {
+    background-color: transparent;
+}
+
+.achButton.achAchieved {
+    color: gold;
 }
 
 .jbButton.ptgBought {
@@ -329,6 +332,7 @@ hr {
     color: gold;
 }
 
+.jbButton.advBought .jbIndicator,
 .jbButton.ptgBought .jbIndicator {
     border-color: gold;
 }

@@ -2140,12 +2140,13 @@ function addPrestigeBlock(ptg) {
  */
 function addAchievementBlock(ach) {
     var achievement = getFromText(ach);
-    if (!achievement || (!achievement.achieved && achievement.hidden) || document.getElementById(achievement.name + "Block")) return;
+    if (!achievement || document.getElementById(achievement.name + "Block")) return;
+    var label = (!achievement.achieved && achievement.hidden) ? "???" : achievement.label;
     var elem = "<div id=\"" + achievement.name + "Block\" class=\"jbBlock achBlock\">"
-        + "<div id=\"" + achievement.name + "Button\" class=\"jbButton button unclickable\" "
+        + "<div id=\"" + achievement.name + "Button\" class=\"jbButton achButton button unclickable\" "
         + "onmouseover=\"tooltip('" + ach + "', event)\" onmouseleave=\"tooltip()\">"
         + "<div class=\"upgIndicator\">"
-        + "<span>" + achievement.label + "</span>"
+        + "<span>" + label + "</span>"
         + "</div>"
         + "</div>"
         + "</div>"
@@ -2818,6 +2819,7 @@ function updateAchievementValues(active = false) {
         if (achievement.hidden && !achievement.achieved) continue;
 
         if (achievement.achieved) {
+            achButton.classList.remove("achHidden");
             achButton.classList.add("achAchieved");
         }
     }
@@ -3167,10 +3169,16 @@ function tooltip(what = "hide", event = null, repositionTooltip = true) {
                 if (game.player.currentLeaders >= game.player.maxLeaders) bottomText += "<br /><span style='color:red;'>You cannot hire an additional leader.</span>";
             }
         } else if (itemType == "achievements") {
-            titleText = (item.fullLabel ? item.fullLabel : item.label);
-            mainText = item.description();
-            bottomText = "Achievement Points: " + (item.points ? item.points : "0");
-            if (item.achieved) bottomText += "<span style='color: green;'> (You have this achievement.)</span>";
+            if (item.hidden && !item.achieved) {
+                titleText = "";
+                mainText = "This achievement is hidden.";
+                bottomText = "Achievement Points: " + (item.points ? item.points : "0");
+            } else {
+                titleText = (item.fullLabel ? item.fullLabel : item.label);
+                mainText = item.description();
+                bottomText = "Achievement Points: " + (item.points ? item.points : "0");
+                if (item.achieved) bottomText += "<span style='color: green;'> (You have this achievement.)</span>";
+            }
         }
     }
 
