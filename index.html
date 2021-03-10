@@ -15,7 +15,8 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://clickerultimate.github.io">
     <meta property="og:title" content="Clicker Ultimate">
-    <meta property="og:description" name="description" content="The Ultimate Clicker Game">
+    <meta property="og:description" content="The Ultimate Clicker Game">
+    <meta name="description" content="The Ultimate Clicker Game">
     <meta name="keywords" content="Clicker, Ultimate, clickerultimate, Idle, Browser, Game">
     <meta name="author" content="Sam">
 
@@ -24,7 +25,7 @@
 
     <link rel="stylesheet" href="./interface.css">
     <link rel="stylesheet" href="./themes.css">
-    <link rel="icon" href="./favicon.ico">
+    <link rel="icon" href="./icon.ico">
 
     <script type="text/javascript" src="./lzstring.js" defer></script>
     <script type="text/javascript" src="./init.js" defer></script>
@@ -114,7 +115,7 @@
                     <hr />
                     <div id="StatisticsContainer" class="mnuContainer">
                         <!-- Insert statistics here -->
-                        <div id="mnuStatsLabelName" class="mnuStatsLabel">Empire Name:</div>
+                        <div id="mnuStatsLabelName" class="mnuStatsLabel">Realm Name:</div>
                         <div id="mnuStatsCurrentName" class="mnuStatsInfo">-</div>
                         <div id="mnuStatsLabelAge" class="mnuStatsLabel locked">Age:</div>
                         <div id="mnuStatsCurrentAge" class="mnuStatsInfo locked">-</div>
@@ -151,6 +152,8 @@
                     <hr />
                     <div id="AchievementsContainer" class="mnuContainer">
                         <!-- Insert achievements here -->
+                    </div>
+                    <div class="achPointsLabel">Current Achievement Points: <div id="achCurrentPoints">0</div>
                     </div>
                 </div>
                 <div id="PrestigeArea" class="mnuArea locked">
@@ -211,7 +214,10 @@
                                 Beginning</span></div>
                         <div class="mnuContentButton button clickable" onclick="toggleDefaultMenu()">
                             Change Default Menu</div>
-                        <div class="mnuContentInfo">On Load: <span id="mnuCurrentDefaultMenu">Keep Last Tab</span>
+                        <div class="mnuContentInfo">On Load: <span id="mnuCurrentDefaultMenu">Keep Last Tab</span></div>
+                        <div class="mnuContentButton button clickable" onclick="toggleDeleteSave()">
+                            Toggle Hard Reset Option</div>
+                        <div class="mnuContentInfo">Delete Save Button: <span id="mnuCurrentDeleteSave">Hidden</span>
                         </div>
                     </div>
                 </div>
@@ -231,8 +237,7 @@
         <div id="importButton" class="ribbonButton button" onclick="toggleImport()">
             <span>Import Save</span>
         </div>
-        <div class="ribbonButton button">
-            <!-- TODO: Add menu item -->
+        <div id="deleteSaveButton" class="ribbonButton button">
         </div>
         <div class="ribbonButton button">
             <!-- TODO: Add menu item -->
@@ -249,6 +254,13 @@
         <div id="pauseButton" class="ribbonButton button" onclick="togglePause()">
             <span id="pauseLabel">Pause</span>
         </div>
+    </div>
+    <div id="achievementPill" onclick="hideAchievement()">
+        <div class="left">
+            <span id="achPoints">0</span>
+        </div>
+        <span id="achIndicator">Achievement Unlocked</span>
+        <span id="achLabel">-</span>
     </div>
     <div id="tooltipContainer" class="ttContainer" style="display: none;">
         <div id="tooltipTop"></div>

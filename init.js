@@ -1,8 +1,8 @@
 function newGame() {
     var initData = {
         global: {
-            version: "0.2.01",
-            latestChanges: "Now generating empire names! Including other minor adjustments and bug fixes.",
+            version: "0.2.02",
+            latestChanges: "Achievements were implemented. Added a hard reset button. Other quality of life changes.",
             start: new Date().getTime(),
             time: 0,
             speed: 10,
@@ -31,9 +31,11 @@ function newGame() {
             messagesSize: "Normal",
             tooltipMode: "Detailed",
             skipFirstUpg: true,
+            hardResetExposed: false
         },
         player: {
             empireName: "",
+            empirePrefix: false,
             totalClicks: 0,
             settingsUnlocked: false,
             prestigeUnlocked: false,
@@ -52,6 +54,7 @@ function newGame() {
             taxPassiveGold: 0,
             prestigePoints: 0,
             nextPrestigePoints: 0,
+            achievementPoints: 0,
             autoClick: 0,
             doubleClick: 0,
             convertPrestiges: 0,
@@ -1022,7 +1025,7 @@ function newGame() {
                 name: "trdTax",
                 label: "Tax",
                 description: function () {
-                    return "Tax your population. Collect <b>" + this.rate + " Gold</b> for each <b>Worker</b> you have. However, doing so will incur an upkeep cost of <b>" + Math.abs(this.maxRate) + " Golds</b> per <b>Building</b>. The collected amount can never go below 0.<br />Currently you have:<br /><b>"
+                    return "Tax your population. Collect <b>" + this.rate + " Gold</b> for each <b>Worker</b> you have. However, doing so will incur an upkeep cost of <b>" + Math.abs(this.maxRate) + " Gold</b> per <b>Building</b>. The collected amount can never go below 0.<br />Currently you have:<br /><b>"
                         + getAmountWorkers() + " Workers giving " + (getAmountWorkers() * this.rate) + " Gold<br />" + getAmountBuildings() + " Buildings costing " + Math.abs(getAmountBuildings() * this.maxRate) + " Gold<br />" + (game.player.taxPassiveGold > 0 ? "Taxman skill giving " + game.player.taxPassiveGold + " Gold<br />" : "") + "Tax Total: " + tax(this.rate, this.maxRate, false) + " Gold";
                 },
                 rate: 1,
@@ -1040,7 +1043,7 @@ function newGame() {
                 name: "trdPropertyTax",
                 label: "Property Tax",
                 description: function () {
-                    return "Tax your population via the properties. Collect <b>" + this.rate + " Golds</b> for each <b>Building</b> you have. However, doing so will incur a welfare cost of <b>" + Math.abs(this.maxRate) + " Golds</b> per <b>Worker</b>. The collected amount can never go below 0.<br />Currently you have:<br /><b>"
+                    return "Tax your population via the properties. Collect <b>" + this.rate + " Gold</b> for each <b>Building</b> you have. However, doing so will incur a welfare cost of <b>" + Math.abs(this.maxRate) + " Gold</b> per <b>Worker</b>. The collected amount can never go below 0.<br />Currently you have:<br /><b>"
                         + getAmountBuildings() + " Buildings giving " + (getAmountBuildings() * this.rate) + " Gold<br />" + getAmountWorkers() + " Workers costing " + Math.abs(getAmountWorkers() * this.maxRate) + " Gold<br />" + (game.player.taxPassiveGold > 0 ? "Taxman skill giving " + game.player.taxPassiveGold + " Gold<br />" : "") + "Tax Total: " + tax(this.maxRate, this.rate, false) + " Gold";
                 },
                 rate: 5,
@@ -1098,6 +1101,7 @@ function newGame() {
                     }
                 },
                 effect: function () { upgradePlayerClickGain(this.rate); },
+                personality: "wise",
                 favored: ["advFire", "advWheel", "advGunpowder"],
                 unfavored: ["advPrintingPress", "advMercantilism", "advMathematics"],
                 locked: true,
@@ -1116,6 +1120,7 @@ function newGame() {
                     }
                 },
                 effect: function () { upgradeBuildingCost(this.rate); buyPassive(getFromText("psvNebuchadnezzar")); },
+                personality: "wise",
                 favored: ["advEngineering", "advFervor", "advValor"],
                 unfavored: ["advPiety", "advIronWill", "advBrotherhood"],
                 locked: true,
@@ -1143,6 +1148,7 @@ function newGame() {
                         buyAdvancement(adv, true);
                     }
                 },
+                personality: "wise",
                 favored: ["advMathematics", "advLogos", "advIndependence"],
                 unfavored: ["advEquestrianism", "advSilverMastery", "advBanking"],
                 locked: true,
@@ -1164,6 +1170,7 @@ function newGame() {
                     }
                 },
                 effect: function () { upgradePlayerClickGain(this.rate); },
+                personality: "stern",
                 favored: ["advFire", "advSword", "advSpear", "advGunpowder"],
                 unfavored: ["advFervor", "advPrintingPress", "advMercantilism"],
                 locked: true,
@@ -1180,6 +1187,7 @@ function newGame() {
                     }
                 },
                 effect: function () { unlock("advLogos", "ldrPlato"); },
+                personality: "wise",
                 favored: ["advLogos", "advTemperance", "advValor"],
                 unfavored: ["advBanking", "advNavigation", "advMonasticism"],
                 locked: true,
@@ -1200,6 +1208,7 @@ function newGame() {
                     unlock(adv.name);
                     if (game.leaders.ldrPythagoras.bought) buyAdvancement(adv, true);
                 },
+                personality: "wise",
                 favored: ["advMathematics", "advTemperance", "advValor", "advLogos"],
                 unfavored: ["advIronWill", "advNavigation", "advMonasticism"],
                 locked: true,
@@ -1223,6 +1232,7 @@ function newGame() {
                     buyAdvancement(adv1, true);
                     buyAdvancement(adv2, true);
                 },
+                personality: "stern",
                 favored: ["advWheel", "advFervor", "advSilverMastery"],
                 unfavored: ["advMathematics", "advTemperance", "advPiety"],
                 locked: true,
@@ -1281,6 +1291,7 @@ function newGame() {
                     buyAdvancement(adv1, true);
                     buyAdvancement(adv2, true);
                 },
+                personality: "stern",
                 favored: ["advWheel", "advMathematics", "advValor"],
                 unfavored: ["advPrintingPress", "advLogos", "advFire"],
                 locked: true,
@@ -1301,6 +1312,7 @@ function newGame() {
                     }
                 },
                 effect: function () { if (game.advancements.advPrintingPress.bought) unlock("advEvangelism", "advArchitecture"); },
+                personality: "pious",
                 favored: ["advEvangelism", "advTheology", "advPrintingPress"],
                 unfavored: ["advLogos", "advMercantilism", "advBrotherhood"],
                 locked: true,
@@ -1333,6 +1345,7 @@ function newGame() {
                 advCost: 2,
                 resourceCost: {},
                 effect: function () { addAdvancementPoints(this.rate); upgradeUpgradeCost(this.maxRate); },
+                personality: "wise",
                 favored: ["advTemperance", "advMathematics", "advIndependence"],
                 unfavored: ["advTheology", "advEcumenism", "advMonasticism", "advEvangelism"],
                 locked: true,
@@ -1365,6 +1378,7 @@ function newGame() {
                 goldCost: 1000,
                 resourceCost: {},
                 effect: function () { buyWorker(getFromText("waterFetcher"), this.rate, true); },
+                personality: "stern",
                 favored: ["advIndependence", "advBrotherhood", "advGunpowder"],
                 unfavored: ["advTemperance", "advDominion", "advPiety", "advBanking"],
                 locked: true,
@@ -2281,7 +2295,7 @@ function newGame() {
                 description: function () { return "The scale and scope of your economy is visibly growing by the day. Allows you to collect <b>Wheat</b> in your keep. This will help you prosper."; },
                 type: "free",
                 resourceCost: {},
-                effect: function () { unlock("wheat", "farmer", "upgIronSickle"); },
+                effect: function () { unlock("wheat", "farmer", "upgIronSickle"); tutorialMessage("workers2"); },
                 locked: true,
                 bought: false
             },
@@ -4647,6 +4661,114 @@ function newGame() {
                 },
                 effect: function () { unlock("advancements", "advDominion"); },
                 bought: false
+            }
+        },
+        achievements: {
+            achColonist: {
+                name: "achColonist",
+                label: "Colonist",
+                description: function () { return "You ventured and built your first the <b>Colony</b>."; },
+                points: 2,
+                hidden: true,
+                achieved: false
+            },
+            achCaveman: {
+                name: "achCaveman",
+                label: "Caveman",
+                description: function () { return "You reached the <b>Stone Age</b> after banging some stones together. Very impressive."; },
+                points: 0,
+                hidden: true,
+                achieved: false
+            },
+            achLord: {
+                name: "achLord",
+                label: "Lord",
+                description: function () { return "You reached the <b>Feudal Age</b>. Mercy mild upon your kingdom."; },
+                points: 1,
+                hidden: true,
+                achieved: false
+            },
+            achDarkTimes: {
+                name: "achDarkTimes",
+                label: "Dark Times",
+                fullLabel: "Dark Times Ahead...",
+                description: function () { return "Oh brave one, you have reached the <b>Dark Age</b>. Best of luck in this upcoming trial."; },
+                points: 1,
+                hidden: true,
+                achieved: false
+            },
+            achScholar: {
+                name: "achScholar",
+                label: "Scholar",
+                description: function () { return "You lead your realm to the age of the <b>Renaissance</b>. You should be proud."; },
+                points: 1,
+                hidden: true,
+                achieved: false
+            },
+            achThirsty: {
+                name: "achThirsty",
+                label: "Thirsty",
+                description: function () { return "Acquire your first <b>Water Fetcher</b>."; },
+                points: 0,
+                hidden: false,
+                achieved: false
+            },
+            achHungry: {
+                name: "achHungry",
+                label: "Hungry",
+                description: function () { return "Hire your first <b>Farmer</b>."; },
+                points: 0,
+                hidden: false,
+                achieved: false
+            },
+            achCraven: {
+                name: "achCraven",
+                label: "Craven",
+                description: function () { return "Hire your first <b>Miner</b> without having a single <b>Water Fetcher</b> or <b>Lumberjack</b> under your employ. Why would you do this?"; },
+                points: 1,
+                hidden: false,
+                achieved: false
+            },
+            achLight: {
+                name: "achLight",
+                label: "Light",
+                fullLabel: "Let There Be Light",
+                description: function () { return "Discover <b>Fire</b>."; },
+                points: 0,
+                hidden: false,
+                achieved: false
+            },
+            achMasonry: {
+                name:"achMasonry",
+                label: "Going Somewhere",
+                description: function () { return "Research <b>Masonry</b>. Time to get serious."; },
+                points: 1,
+                hidden: false,
+                achieved: false
+            },
+            achTrader: {
+                name:"achTrader",
+                label: "Trader",
+                description: function () { return "Research <b>Economics</b>. What are these shiny metals for anyway?"; },
+                points: 0,
+                hidden: false,
+                achieved: false
+            },
+            achPureGreed: {
+                name:"achPureGreed",
+                label: "Pure Greed",
+                description: function () { return "You conducted a <b>Tax</b> for a profit of <b>0 Gold</b> (before passive increases). Stop this madness."; },
+                points: 1,
+                hidden: true,
+                achieved: false
+            },
+            achMetalCaster: {
+                name:"achMetalCaster",
+                label: "Metal Caster",
+                description: function () { return "Build your first <b>Foundry</b>. Do you see where this is heading?"; },
+                points: 1,
+                hidden: false,
+                achieved: false
             }
         }
     };

@@ -12,19 +12,14 @@
 
 /*
 =TODO LIST=
-
-Add a "Remove" toggle for workers/buildings
 Gold needs to do more things
-Add more things to statistics section
-Add things to Achievements section
-Achievements to have some sort of benefit
+Achievements points to do something
 Add more items to the tutorial
 Have some sort of daily reward
 Fix Equestrianism
 Give messages with choice buttons
 Turn millers into bakers with new age
 Add setting to automatically purchase free upgrades
-Add leader dialog
 */
 
 /**
@@ -132,6 +127,30 @@ function toggleExport() {
 function toggleImport() {
     if (game.global.currentTooltip == "import" && game.global.isPaused) tooltip("pause");
     else updateModal("import");
+}
+
+/**
+ * Hides/exposes the delete save button.
+ */
+function toggleDeleteSave() {
+    game.settings.hardResetExposed = !game.settings.hardResetExposed;
+    updateDeleteSaveSetting();
+    if (game.settings.hardResetExposed) message("The Delete Save button is now exposed in the bottom ribbon.", "warning");
+}
+
+/**
+ * Updates the interface according to the hard reset setting.
+ */
+function updateDeleteSaveSetting() {
+    document.getElementById("mnuCurrentDeleteSave").innerHTML = (game.settings.hardResetExposed ? "Exposed" : "Hidden");
+
+    if (game.settings.hardResetExposed) {
+        document.getElementById("deleteSaveButton").innerHTML = "<span>Delete Save</span>";
+        document.getElementById("deleteSaveButton").onclick = function () { tooltip("delete"); };
+    } else {
+        document.getElementById("deleteSaveButton").innerHTML = "";
+        document.getElementById("deleteSaveButton").onclick = undefined;
+    }
 }
 
 /**
@@ -361,6 +380,35 @@ function message(content, type) {
 }
 
 /**
+ * A leader is hired and greets the player.
+ * 
+ * @param {object} leader The hired leader.
+ */
+function leaderGreeting(leader) {
+    if (!leader) return;
+    var messages = [];
+    var empire = getEmpireLabel();
+    var Empire = getEmpireLabel(true);
+
+    switch (leader.personality) {
+        case "wise":
+            messages = ["Do you seek my counsel? Very well...", "May we help " + empire + " prosper.", "I foresaw our meeting in a dream.",
+                "Wise of you to heed my counsel, lord.", Empire + " is destined for greatness with me at your side.", "Long may you reign over " + empire + "."];
+            break;
+        case "stern":
+            messages = ["Out with it.", "For " + empire + "!", "Godspeed.", "Your orders?", "For victory.", "Hail.", "My liege.", "None can stand before us."];
+            break;
+        case "pious":
+            messages = ["May God grant us victory.", "God watches over us.", "By the grace of God.", "We shall strive to earn God's favor."]
+            break;
+        default:
+            messages = ["Hail, monarch.", "Well met.", "Salutations.", "My regards."];
+    }
+
+    message("<b>" + leader.label + "</b>: \"" + getRandom(messages) + "\"");
+}
+
+/**
  * One of the player's hired leaders sends a message to the player.
  * @param {object} advancement The specific advancement purchased.
  */
@@ -369,6 +417,8 @@ function leaderMessage(advancement) {
 
     var leaderList = [];
     var favoringList = [];
+    var empire = getEmpireLabel();
+    var Empire = getEmpireLabel(true);
     for (var ldr in game.leaders) {
         if (!game.leaders[ldr].bought) continue;
         if (game.leaders[ldr].favored && game.leaders[ldr].favored.includes(advancement.name)) {
@@ -389,9 +439,9 @@ function leaderMessage(advancement) {
     if (favor == "favor") {
         availableMessages = [
             "<b>" + advancement.label + "</b> should prove useful later on.",
-            "Our civilization will be remembered for its <b>" + advancement.label + "</b>.",
+            Empire + " will be remembered for its <b>" + advancement.label + "</b>.",
             "Aah, <b>" + advancement.label + "</b>! A wise choice.",
-            "I believe <b>" + advancement.label + "</b> will play an important role in our civilization.",
+            "I believe <b>" + advancement.label + "</b> will play an important role in " + empire + ".",
             "<b>" + advancement.label + "</b> will change the course of history for the better."
         ];
     } else {
@@ -400,10 +450,10 @@ function leaderMessage(advancement) {
             "Was <b>" + advancement.label + "</b> really a wise investment?.",
             "<b>" + advancement.label + "</b> clearly was not worth the advancement points.",
             "I think there were better advancements to research than <b>" + advancement.label + "</b>.",
-            "Our civilization didn't need <b>" + advancement.label + "</b> to prosper."
+            Empire + " doesn't need <b>" + advancement.label + "</b> to prosper."
         ];
     }
-    var msg = leader.label + ": \"" + getRandom(availableMessages) + "\"";
+    var msg = "<b>" + leader.label + "</b>: \"" + getRandom(availableMessages) + "\"";
     message(msg);
 }
 
@@ -953,6 +1003,7 @@ function buyLeader(leader) {
     leader.bought = true;
     game.player.currentLeaders++;
     updateLeaderValues(leader, true);
+    leaderGreeting(leader);
 }
 
 
@@ -1025,6 +1076,29 @@ function buyPassive(passive) {
         recalculateResRate(resource);
         updateResRateValues(resource, true);
     }
+}
+
+/**
+ * Unlocks an achievement for the player.
+ * 
+ * @param {string} ach The name of the achievement being unlocked.
+ */
+function achieve(ach) {
+    var achievement = getFromText(ach);
+    if (!achievement || !achievement.label || achievement.achieved) return;
+    document.getElementById("achLabel").innerHTML = (achievement.fullLabel ? achievement.fullLabel : achievement.label);
+    document.getElementById("achPoints").innerHTML = achievement.points ? achievement.points : 0;
+    achievement.achieved = true;
+    game.player.achievementPoints += achievement.points;
+
+    document.getElementById("achievementPill").style.opacity = 100;
+    setTimeout(hideAchievement, 4000);
+    if (achievement.hidden) updateContainer("achievements");
+    updateAchievementValues(true);
+}
+
+function hideAchievement() {
+    document.getElementById("achievementPill").style.opacity = 0;
 }
 
 /**
@@ -1321,6 +1395,7 @@ function tax(workerRate, buildingRate, active = true) {
     number += (getAmountWorkers() * workerRate);
     number += (getAmountBuildings() * buildingRate);
     if (number <= 0) number = 0;
+    if (active && number == 0) achieve("achPureGreed");
     number += game.player.taxPassiveGold;
     if (!active) return number;
     gainGold(number);
@@ -1367,24 +1442,48 @@ function canAfford(what) {
 }
 
 /**
- * Returns (or generates) the name of the current empire
+ * Returns (or generates) the name of the current empire.
+ * *n : adjective rather than noun.
+ * t* : the name starts with "The".
  */
 function getEmpireName() {
     if (game.player.empireName) return game.player.empireName;
-    var prefixes = ["Greater *", "Upper *", "Lower *", "United *", "Northern *", "Southern *", "Eastern *", "Western *", "Holy *n Empire", "*n Imperium", "State of *",
-        "Dominion of *", "Dutchy of *", "Republic of *", "*n Republic", "Kingdom of *", "*n Empire", "*n Dynasty", "*n Union", "*n Congregation", "*n Reign", "*n Reich",
-        "*n Commonwealth", "County of *", "Principality of *", "Central *", "Outer *", "*n Order", "*n Federation", "Independant *", "North *", "South *", "West *", "East *"];
+    var prefixes = ["Greater *", "Upper *", "Lower *", "United *", "Northern *", "Southern *", "Eastern *", "Western *", "Holy *n Empire", "*n Imperium", "State of t*",
+        "Dominion of t*", "Dutchy of t*", "Republic of t*", "t*n Republic", "Kingdom of t*", "*n Empire", "*n Dynasty", "*n Union", "*n Congregation", "*n Reign", "*n Reich",
+        "*n Commonwealth", "County of t*", "Principality of t*", "Central *", "Outer *", "*n Order", "*n Federation", "Independant *", "North *", "South *", "West *", "East *"];
     var suffixes = ["Bavaria", "Germania", "Prussia", "Rome", "Austria", "Hungary", "Bulgaria", "Italy", "Germany", "Saxony", "Sicily", "Livonia", "Crimea", "Moldavia",
         "Byzantium", "Ottoman", "Albania", "Anatolia", "Macedonia", "Galicia", "Québec", "Serbia", "Sparta", "Athens", "Thebes", "Caledonia", "Francia", "Angles", "Wessex",
         "Russia", "Mongolia", "Macedonia", "Iberia", "Sumer", "Parthia", "Babylone", "Persia", "Assyria", "Egypt", "Spain", "America", "Akkad", "Arabia", "Cossackia"];
     var prefix = getRandom(prefixes);
     var suffix = getRandom(suffixes);
+    var hasPrefix = false;
+    if (prefix.includes("t*")) {
+        prefix = prefix.replace("t*", "*");
+        hasPrefix = true;
+    }
     if (prefix.includes("*n")) {
         suffix = adjective(suffix);
         prefix = prefix.replace("*n", "*");
+        hasPrefix = true;
     }
     var name = prefix.replace("*", suffix);
     game.player.empireName = name;
+    game.player.empirePrefix = hasPrefix;
+    return name;
+}
+
+/**
+ * Returns the full name of the empire, with a prefix if applicable.
+ * 
+ * @param {boolean} capitalize Whether to capitalize the prefix if applicable.
+ */
+function getEmpireLabel(capitalize = false) {
+    var name = "";
+    if (game.player.empirePrefix) {
+        if (capitalize) name += "The ";
+        else name += "the ";
+    }
+    name += game.player.empireName;
     return name;
 }
 
@@ -1788,6 +1887,12 @@ function updateContainer(what) {
                 addPrestigeBlock(ptg)
             }
             break;
+        case "achievements":
+            document.getElementById("AchievementsContainer").innerHTML = "<!-- Insert achievements here -->";
+            for (var ach in game.achievements) {
+                addAchievementBlock(ach);
+            }
+            break;
     }
     for (var i in elems) {
         document.getElementById(elems[i]).classList.remove("locked");
@@ -2020,13 +2125,33 @@ function addPrestigeBlock(ptg) {
 }
 
 /**
+ * Dynamically creates an achievement HTML block.
+ * 
+ * @param {string} ach The type of achievement to display.
+ */
+function addAchievementBlock(ach) {
+    var achievement = getFromText(ach);
+    if (!achievement || (!achievement.achieved && achievement.hidden) || document.getElementById(achievement.name + "Block")) return;
+    var elem = "<div id=\"" + achievement.name + "Block\" class=\"jbBlock achBlock\">"
+        + "<div id=\"" + achievement.name + "Button\" class=\"jbButton button unclickable\" "
+        + "onmouseover=\"tooltip('" + ach + "', event)\" onmouseleave=\"tooltip()\">"
+        + "<div class=\"upgIndicator\">"
+        + "<span>" + achievement.label + "</span>"
+        + "</div>"
+        + "</div>"
+        + "</div>"
+
+    document.getElementById("AchievementsContainer").innerHTML += elem;
+}
+
+/**
  * Unlocks all the advancements related to an age.
  * 
  * @param {object} age The specific age being unlocked.
  * @param {number} number The amount of Advancement Points to grant.
  */
 function advanceAge(age, number = 0) {
-    if (!age || !age.name) return;
+    if (!age || !age.name) return;
     addAdvancementPoints(number);
     for (var adv in game.advancements) {
         var advancement = game.advancements[adv];
@@ -2035,7 +2160,7 @@ function advanceAge(age, number = 0) {
     }
     updateAdvancementValues(true);
     updateStatistics();
-    message("Welcome to the <b>" + age.label + "</b>.");
+    message(getEmpireLabel(true) + " has entered the <b>" + age.label + "</b>.");
 }
 
 /**
@@ -2222,6 +2347,7 @@ function prestigeReset() {
     carryover.settings = game.settings;
     carryover.settings.tutorialCompleted = false;
     carryover.prestiges = game.prestiges;
+    carryover.achievements = game.achievements;
 
     var loadString = LZString.compressToBase64(JSON.stringify(carryover));
     if (!load(loadString)) message("There was a problem with resetting the game.", "warning");
@@ -2232,6 +2358,7 @@ function prestigeReset() {
         clickBuy("upgLeaders");
         unlock.apply(this, leadersList);
     }
+    message("A new colony was built: <b>" + game.player.empireName + "</b>.");
 }
 
 /**
@@ -2259,6 +2386,7 @@ function updateInterface() {
     updateMsgFontSize();
     updateTooltipMode();
     updateDefaultMenu();
+    updateDeleteSaveSetting();
     updateStatistics();
 }
 
@@ -2277,6 +2405,7 @@ function updateValues(forceUpdate = false) {
         updateContainer("leaders");
         updateContainer("advancements");
         updateContainer("prestiges");
+        updateContainer("achievements");
     }
     //resources
     for (var res in game.resources) {
@@ -2328,6 +2457,8 @@ function updateValues(forceUpdate = false) {
     updateAdvancementValues(forceUpdate);
     //prestiges
     updatePrestigeValues(forceUpdate);
+    //achievements
+    updateAchievementValues(forceUpdate);
 }
 
 /**
@@ -2516,6 +2647,20 @@ function updateAvailableUpgrades(active = false) {
     if (game.advancements.advMonasticism.locked && game.player.colonies >= 5 && game.upgrades.upgFeudalAge.bought) unlock("advMonasticism");
     if (game.advancements.advEcumenism.locked && game.player.colonies >= 8 && game.upgrades.upgDarkAge.bought) unlock("advEcumenism");
 
+    //check for achievements
+    if (!game.achievements.achThirsty.achieved && game.workers.waterFetcher.current > 0) achieve("achThirsty");
+    else if (!game.achievements.achCaveman.achieved && game.upgrades.upgStoneAge.bought) achieve("achCaveman");
+    else if (!game.achievements.achLight.achieved && game.advancements.advFire.bought) achieve("achLight");
+    else if (!game.achievements.achMasonry.achieved && game.upgrades.upgMasonry.bought) achieve("achMasonry");
+    else if (!game.achievements.achLord.achieved && game.upgrades.upgFeudalAge.bought) achieve("achLord");
+    else if (!game.achievements.achMetalCaster.achieved && game.buildings.foundry.current > 0) achieve("achMetalCaster");
+    else if (!game.achievements.achHungry.achieved && game.workers.farmer.current > 0) achieve("achHungry");
+    else if (!game.achievements.achCraven.achieved && game.workers.waterFetcher.current < 1 && game.workers.lumberjack.current < 1 && game.workers.miner.current > 0) achieve("achCraven");
+    else if (!game.achievements.achDarkTimes.achieved && game.upgrades.upgDarkAge.bought) achieve("achDarkTimes");
+    else if (!game.achievements.achTrader.achieved && game.upgrades.upgEconomics.bought) achieve("achTrader");
+    else if (!game.achievements.achScholar.achieved && game.upgrades.upgRenaissance.bought) achieve("achScholar");
+    else if (!game.achievements.achColonist.achieved && game.player.colonies > 0) achieve("achColonist");
+
     //leaders
     if (!game.upgrades.upgLeaders.bought) return;
     if (game.leaders.ldrNebuchadnezzar.locked && game.player.colonies >= 3) unlock("ldrNebuchadnezzar");
@@ -2613,13 +2758,37 @@ function updatePrestigeValues(active = false) {
         ptgIndicator.textContent = prestige.level + "/" + prestige.maxLevel;
         if (prestige.bought) {
             ptgButton.classList.replace("clickable", "unclickable");
-            ptgButton.classList.add("advBought");
+            ptgButton.classList.remove("ptgInProgress");
+            ptgButton.classList.add("ptgBought");
             continue;
         }
         if (canAfford(prestige)) {
             if (ptgButton.classList.contains("unclickable")) ptgButton.classList.replace("unclickable", "clickable");
+            ptgButton.classList.remove("ptgInProgress");
         } else {
             if (ptgButton.classList.contains("clickable")) ptgButton.classList.replace("clickable", "unclickable");
+            if (prestige.level > 0) ptgButton.classList.add("ptgInProgress");
+        }
+    }
+}
+
+/**
+ * Updates all achievement-related HTML elements.
+ * 
+ * @param {bool} active Whether this is user action.
+ */
+function updateAchievementValues(active = false) {
+    if (!active) return;
+    document.getElementById("achCurrentPoints").innerHTML = game.player.achievementPoints;
+    for (var ach in game.achievements) {
+        var achievement = game.achievements[ach];
+        var achBlock = document.getElementById(achievement.name + "Block");
+        var achButton = document.getElementById(achievement.name + "Button");
+        if (!achBlock || !achButton) continue;
+        if (achievement.hidden && !achievement.achieved) continue;
+
+        if (achievement.achieved) {
+            achButton.classList.add("achAchieved");
         }
     }
 }
@@ -2868,6 +3037,15 @@ function copyExport() {
 }
 
 /**
+ * Deletes the current save and resets the game.
+ */
+function deleteSave() {
+    localStorage.removeItem("ClickerUltisvg");
+    localStorage.removeItem("theme");
+    location.reload();
+}
+
+/**
  * Shows/hides the tooltip modal based on a provided instruction.
  * 
  * @param {string} what Name of the object to display.
@@ -2889,17 +3067,22 @@ function tooltip(what = "hide", event = null, repositionTooltip = true) {
     var bottomText = "Bottom";
 
     if (what == "pause") {
-        titleText = "PAUSED"
-        mainText = "Your game is paused. Click the \"Unpause\" button to resume."
-        bottomText = "<div class=\"mdButton mdRed button\" onclick=\"togglePause()\"><span>Unpause</span></div>"
+        titleText = "PAUSED";
+        mainText = "Your game is paused. Click the \"Unpause\" button to resume.";
+        bottomText = "<div class=\"mdButton mdRed button\" onclick=\"togglePause()\"><span>Unpause</span></div>";
     } else if (what == "export") {
         titleText = "Export"
         mainText = "Copy/Paste the following text to import your game:<textarea id=\"exportText\" class=\"mdTextArea\" disabled>" + save(true) + "</textarea>";
-        bottomText = "<div class=\"mdButton mdGreen button\" onclick=\"copyExport()\">Copy to Clipboard</div><div class=\"mdButton mdGray button\" onclick=\"toggleExport()\"><span>Close</span></div>"
+        bottomText = "<div class=\"mdButton mdGreen button\" onclick=\"copyExport()\">Copy to Clipboard</div><div class=\"mdButton mdGray button\" onclick=\"toggleExport()\"><span>Close</span></div>";
     } else if (what == "import") {
-        titleText = "Import"
-        mainText = "Paste the export string here:<textarea id=\"importText\" class=\"mdTextArea\"></textarea>"
-        bottomText = "<div class=\"mdButton mdGreen button\" onclick=\"importLoad()\">Load</div><div class=\"mdButton mdGray button\" onclick=\"toggleImport()\">Close</div>"
+        titleText = "Import";
+        mainText = "Paste the export string here:<textarea id=\"importText\" class=\"mdTextArea\"></textarea>";
+        bottomText = "<div class=\"mdButton mdGreen button\" onclick=\"importLoad()\">Load</div><div class=\"mdButton mdGray button\" onclick=\"toggleImport()\">Close</div>";
+    } else if (what === "delete") {
+        titleText = "Delete Save";
+        mainText = "Delete your save and reset the game? (This cannot be undone)";
+        bottomText = "<div class=\"mdButton mdRed button\" onclick=\"deleteSave()\">Yes</div><div class=\"mdButton mdGray button\" onclick=\"tooltip()\">Cancel</div>";
+        updateModalBackground(false, true);
     } else if (what == "colony") {
         var advPts = prettify(game.player.advancementPoints + game.player.nextAdvancementPoints + (game.prestiges.ptgAdvanced.level * game.prestiges.ptgAdvanced.rate), 0, true);
         var ptgPts = prettify(game.player.prestigePoints + game.player.nextPrestigePoints, 0, true);
@@ -2953,6 +3136,11 @@ function tooltip(what = "hide", event = null, repositionTooltip = true) {
                 bottomText = getCostLabel(item);
                 if (game.player.currentLeaders >= game.player.maxLeaders) bottomText += "<br /><span style='color:red;'>You cannot hire an additional leader.</span>";
             }
+        } else if (itemType == "achievements") {
+            titleText = (item.fullLabel ? item.fullLabel : item.label);
+            mainText = item.description();
+            bottomText = "Achievement Points: " + (item.points ? item.points : "0");
+            if (item.achieved) bottomText += "<span style='color: green;'> (You have this achievement.)</span>";
         }
     }
 
