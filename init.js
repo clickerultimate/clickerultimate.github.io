@@ -1,8 +1,8 @@
 function newGame() {
     var initData = {
         global: {
-            version: "0.2.02",
-            latestChanges: "Achievements were implemented. Added a hard reset button. Other quality of life changes.",
+            version: "0.2.03",
+            latestChanges: "Doubled the amount of achievements. Fixed some glitches in the UI.",
             start: new Date().getTime(),
             time: 0,
             speed: 10,
@@ -21,6 +21,7 @@ function newGame() {
             selectedMenu: "messages",
             defaultMenu: "Keep Last Tab",
             selectedTheme: "defaultTheme",
+            fancyGraphics: false,
             autoSaveEnabled: true,
             tutorialEnabled: true,
             tutorialCompleted: false,
@@ -1068,7 +1069,7 @@ function newGame() {
                 goldBase: 10,
                 goldRate: 10,
                 resourceCost: {},
-                effect: function () { addAdvancementPoints(this.rate); },
+                effect: function () { addAdvancementPoints(this.rate); achieve("achGlitters"); },
                 locked: true
             },
             trdAdvancementPoint2: {
@@ -4672,6 +4673,22 @@ function newGame() {
                 hidden: true,
                 achieved: false
             },
+            achPioneer: {
+                name: "achPioneer",
+                label: "Pioneer",
+                description: function () { return "Your influence and power knows no bounds. You built <b>5 Colonies</b> without breaking a sweat."; },
+                points: 2,
+                hidden: true,
+                achieved: false
+            },
+            achLuminary: {
+                name: "achLuminary",
+                label: "Luminary",
+                description: function () { return "All men shall bow to you. You extended the might of your empire to a total of <b>10 Colonies</b>."; },
+                points: 3,
+                hidden: true,
+                achieved: false
+            },
             achCaveman: {
                 name: "achCaveman",
                 label: "Caveman",
@@ -4703,6 +4720,46 @@ function newGame() {
                 description: function () { return "You lead your realm to the age of the <b>Renaissance</b>. You should be proud."; },
                 points: 1,
                 hidden: true,
+                achieved: false
+            },
+            achRebel: {
+                name: "achRebel",
+                label: "Rebel",
+                description: function () { return "You reached the <b>Age of Revolution</b>. Go forth and forge your own destiny."; },
+                points: 1,
+                hidden: true,
+                achieved: false
+            },
+            achBeginner: {
+                name: "achBeginner",
+                label: "Beginner",
+                description: function () { return "The only way to craft your empire, click by click. Reach <b>100 Clicks</b>.<br />(" + Math.min(game.player.totalClicks, 100) + "/100)"; },
+                points: 0,
+                hidden: false,
+                achieved: false
+            },
+            achApprentice: {
+                name: "achApprentice",
+                label: "Apprentice",
+                description: function () { return "Are you getting somewhere yet? Reach <b>1000 Clicks</b>.<br />(" + Math.min(game.player.totalClicks, 1000) + "/1000)"; },
+                points: 0,
+                hidden: false,
+                achieved: false
+            },
+            achJourneyman: {
+                name: "achJourneyman",
+                label: "Journeyman",
+                description: function () { return "The real clicker is the friends we make along the way. Reach <b>10 000 Clicks</b>.<br />(" + prettify(Math.min(game.player.totalClicks, 10000), 0, true) + "/10K)"; },
+                points: 1,
+                hidden: false,
+                achieved: false
+            },
+            achExpert: {
+                name: "achExpert",
+                label: "Expert",
+                description: function () { return "No amount of prestige points can cure your carpal tunnel syndrome. Reach <b>100 000 Clicks</b>.<br />(" + prettify(Math.min(game.player.totalClicks, 100000), 0, true) + "/100K)"; },
+                points: 2,
+                hidden: false,
                 achieved: false
             },
             achThirsty: {
@@ -4739,7 +4796,7 @@ function newGame() {
                 achieved: false
             },
             achMasonry: {
-                name:"achMasonry",
+                name: "achMasonry",
                 label: "Going Somewhere",
                 description: function () { return "Research <b>Masonry</b>. Time to get serious."; },
                 points: 1,
@@ -4747,7 +4804,7 @@ function newGame() {
                 achieved: false
             },
             achTrader: {
-                name:"achTrader",
+                name: "achTrader",
                 label: "Trader",
                 description: function () { return "Research <b>Economics</b>. What are these shiny metals for anyway?"; },
                 points: 0,
@@ -4755,19 +4812,60 @@ function newGame() {
                 achieved: false
             },
             achPureGreed: {
-                name:"achPureGreed",
+                name: "achPureGreed",
                 label: "Pure Greed",
                 description: function () { return "You conducted a <b>Tax</b> for a profit of <b>0 Gold</b> (before passive increases). Stop this madness."; },
                 points: 1,
                 hidden: true,
                 achieved: false
             },
+            achGlitters: {
+                name: "achGlitters",
+                label: "Glitters",
+                fullLabel: "All that glitters is not gold...",
+                description: function () { return "You traded <b>Gold</b> for an <b>Achievement Point</b>. What else is money good for, really?"; },
+                points: 0,
+                hidden: true,
+                achieved: false
+            },
             achMetalCaster: {
-                name:"achMetalCaster",
+                name: "achMetalCaster",
                 label: "Metal Caster",
                 description: function () { return "Build your first <b>Foundry</b>. Do you see where this is heading?"; },
                 points: 1,
                 hidden: false,
+                achieved: false
+            },
+            achForeman: {
+                name: "achForeman",
+                label: "Foreman",
+                description: function () { return "Build an impressive total of <b>15 Stone Quarries</b>."; },
+                points: 1,
+                hidden: false,
+                achieved: false
+            },
+            achWillOfThePeople: {
+                name: "achWillOfThePeople",
+                label: "Will of the People",
+                description: function () { return "Build <b>20 Water Mills</b> and <b>20 Grain Mills</b> without having to resort to using any of the <b>Trades</b>."; },
+                points: 1,
+                hidden: false,
+                achieved: false
+            },
+            achInformed: {
+                name: "achInformed",
+                label: "Informed",
+                description: function () { return "Recruit your first <b>Leader</b>. May you heed their advice."; },
+                points: 0,
+                hidden: false,
+                achieved: false
+            },
+            achGreatOne: {
+                name: "achGreatOne",
+                label: "The Great One",
+                description: function () { return "You have acquired <b>Alexander The Great</b> as one of your counselors. Your enemies should be afraid."; },
+                points: 1,
+                hidden: true,
                 achieved: false
             }
         }

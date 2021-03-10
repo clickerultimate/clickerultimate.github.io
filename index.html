@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+    <meta charset="UTF-8">
     <!-- 
     Clicker Ultimate
 
@@ -11,11 +12,11 @@
     (at your option) any later version.  -->
 
     <title>Clicker Ultimate</title>
-    <meta charset="UTF-8">
-    <meta property="og:type" content="website">
+    <meta property="og:type" content="game">
     <meta property="og:url" content="https://clickerultimate.github.io">
     <meta property="og:title" content="Clicker Ultimate">
     <meta property="og:description" content="The Ultimate Clicker Game">
+    <meta property="og:author" content="Sam">
     <meta name="description" content="The Ultimate Clicker Game">
     <meta name="keywords" content="Clicker, Ultimate, clickerultimate, Idle, Browser, Game">
     <meta name="author" content="Sam">
@@ -25,7 +26,7 @@
 
     <link rel="stylesheet" href="./interface.css">
     <link rel="stylesheet" href="./themes.css">
-    <link rel="icon" href="./icon.ico">
+    <link rel="icon" href="./favicon.ico">
 
     <script type="text/javascript" src="./lzstring.js" defer></script>
     <script type="text/javascript" src="./init.js" defer></script>
@@ -201,6 +202,9 @@
                         <div class="mnuContentButton button clickable" onclick="switchTheme()">Change Theme</div>
                         <div class="mnuContentInfo">Current Theme: <span id="mnuCurrentTheme">Default (Dark)</span>
                         </div>
+                        <div class="mnuContentButton button clickable" onclick="switchGraphics()">Change Graphics</div>
+                        <div class="mnuContentInfo">Current Graphics: <span id="mnuCurrentGraphics">Default</span>
+                        </div>
                         <div class="mnuContentButton button clickable" onclick="toggleMsgFontSize()">
                             Change Messages Text Size</div>
                         <div class="mnuContentInfo">Current Size: <span id="mnuCurrentMsgSize">Normal</span></div>
@@ -255,7 +259,7 @@
             <span id="pauseLabel">Pause</span>
         </div>
     </div>
-    <div id="achievementPill" onclick="hideAchievement()">
+    <div id="achievementPill" style="visibility: hidden; opacity: 0;" onclick="hideAchievement()">
         <div class="left">
             <span id="achPoints">0</span>
         </div>

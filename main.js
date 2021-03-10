@@ -818,6 +818,7 @@ function clickResource(what, isAuto = false) {
     if (isAuto) return;
     game.player.totalClicks++;
     updateStatistics();
+    checkClickAchievements();
 }
 
 /**
@@ -1091,14 +1092,23 @@ function achieve(ach) {
     achievement.achieved = true;
     game.player.achievementPoints += achievement.points;
 
-    document.getElementById("achievementPill").style.opacity = 100;
+    var achievementPill = document.getElementById("achievementPill");
+    achievementPill.style.transition = "visibility 0s linear 0s, opacity 1s";
+    achievementPill.style.visibility = "visible";
+    achievementPill.style.opacity = 1;
     setTimeout(hideAchievement, 4000);
     if (achievement.hidden) updateContainer("achievements");
     updateAchievementValues(true);
 }
 
+/**
+ * Hides the achievement popup.
+ */
 function hideAchievement() {
-    document.getElementById("achievementPill").style.opacity = 0;
+    var achievementPill = document.getElementById("achievementPill");
+    achievementPill.style.transition = "visibility 0s linear 1s, opacity 1s";
+    achievementPill.style.opacity = 0;
+    achievementPill.style.visibility = "hidden";
 }
 
 /**
@@ -2131,12 +2141,13 @@ function addPrestigeBlock(ptg) {
  */
 function addAchievementBlock(ach) {
     var achievement = getFromText(ach);
-    if (!achievement || (!achievement.achieved && achievement.hidden) || document.getElementById(achievement.name + "Block")) return;
+    if (!achievement || document.getElementById(achievement.name + "Block")) return;
+    var label = (!achievement.achieved && achievement.hidden) ? "???" : achievement.label;
     var elem = "<div id=\"" + achievement.name + "Block\" class=\"jbBlock achBlock\">"
-        + "<div id=\"" + achievement.name + "Button\" class=\"jbButton button unclickable\" "
+        + "<div id=\"" + achievement.name + "Button\" class=\"jbButton achButton button unclickable\" "
         + "onmouseover=\"tooltip('" + ach + "', event)\" onmouseleave=\"tooltip()\">"
         + "<div class=\"upgIndicator\">"
-        + "<span>" + achievement.label + "</span>"
+        + "<span>" + label + "</span>"
         + "</div>"
         + "</div>"
         + "</div>"
@@ -2581,6 +2592,7 @@ function updateTheme() {
     if (!availableThemes.includes(game.settings.selectedTheme)) game.settings.selectedTheme = "defaultTheme";
     //Clear previous theme
     document.body.className = "";
+    updateGraphics();
     localStorage.removeItem("theme");
 
     var i = game.global.availableThemes.indexOf(game.settings.selectedTheme);
@@ -2607,6 +2619,26 @@ function switchTheme() {
     game.settings.selectedTheme = toggleOption(game.global.availableThemes, game.settings.selectedTheme);
     localStorage.setItem("theme", game.settings.selectedTheme);
     updateTheme();
+}
+
+/**
+ * Toggles the fancy graphics settings.
+ */
+function switchGraphics() {
+    game.settings.fancyGraphics = !game.settings.fancyGraphics;
+    updateGraphics();
+}
+
+/**
+ * Updates the graphics settings to its new value.
+ */
+function updateGraphics() {
+    if (game.settings.fancyGraphics) {
+        document.body.classList.add("fancy");
+    } else {
+        document.body.classList.remove("fancy");
+    }
+    document.getElementById("mnuCurrentGraphics").innerHTML = game.settings.fancyGraphics ? "Fancy" : "Default";
 }
 
 /**
@@ -2660,6 +2692,13 @@ function updateAvailableUpgrades(active = false) {
     else if (!game.achievements.achTrader.achieved && game.upgrades.upgEconomics.bought) achieve("achTrader");
     else if (!game.achievements.achScholar.achieved && game.upgrades.upgRenaissance.bought) achieve("achScholar");
     else if (!game.achievements.achColonist.achieved && game.player.colonies > 0) achieve("achColonist");
+    else if (!game.achievements.achRebel.achieved && game.upgrades.upgRevolutionAge.bought) achieve("achRebel");
+    else if (!game.achievements.achInformed.achieved && game.player.currentLeaders > 0) achieve("achInformed");
+    else if (!game.achievements.achPioneer.achieved && game.player.colonies >= 5) achieve("achPioneer");
+    else if (!game.achievements.achLuminary.achieved && game.player.colonies >= 10) achieve("achLuminary");
+    else if (!game.achievements.achGreatOne.achieved && game.leaders.ldrAlexander3.bought) achieve("achGreatOne");
+    else if (!game.achievements.achForeman.achieved && game.buildings.stoneQuarry.current >= 15) achieve("achForeman");
+    else if (!game.achievements.achWillOfThePeople.achieved && game.buildings.waterMill.current >= 20 && game.buildings.grainMill.current >= 20 && getAmountTrades() < 1) achieve("achWillOfThePeople");
 
     //leaders
     if (!game.upgrades.upgLeaders.bought) return;
@@ -2680,6 +2719,16 @@ function updateAvailableUpgrades(active = false) {
     if (game.leaders.ldrGalileo.locked && game.player.colonies >= 4 && game.advancements.advMathematics.bought) unlock("ldrGalileo");
     if (game.leaders.ldrKepler.locked && game.player.colonies >= 7 && game.advancements.advMathematics.bought) unlock("ldrKepler");
     if (game.leaders.ldrHancock.locked && game.advancements.advIndependence.bought) unlock("ldrHancock");
+}
+
+/**
+ * Checks for click-related achievements.
+ */
+function checkClickAchievements() {
+    if (!game.achievements.achBeginner.achieved && game.player.totalClicks >= 100) achieve("achBeginner");
+    else if (!game.achievements.achApprentice.achieved && game.player.totalClicks >= 1000) achieve("achApprentice");
+    else if (!game.achievements.achJourneyman.achieved && game.player.totalClicks >= 10000) achieve("achJourneyman");
+    else if (!game.achievements.achExpert.achieved && game.player.totalClicks >= 100000) achieve("achExpert");
 }
 
 /**
@@ -2788,6 +2837,7 @@ function updateAchievementValues(active = false) {
         if (achievement.hidden && !achievement.achieved) continue;
 
         if (achievement.achieved) {
+            achButton.classList.remove("achHidden");
             achButton.classList.add("achAchieved");
         }
     }
@@ -3137,10 +3187,16 @@ function tooltip(what = "hide", event = null, repositionTooltip = true) {
                 if (game.player.currentLeaders >= game.player.maxLeaders) bottomText += "<br /><span style='color:red;'>You cannot hire an additional leader.</span>";
             }
         } else if (itemType == "achievements") {
-            titleText = (item.fullLabel ? item.fullLabel : item.label);
-            mainText = item.description();
-            bottomText = "Achievement Points: " + (item.points ? item.points : "0");
-            if (item.achieved) bottomText += "<span style='color: green;'> (You have this achievement.)</span>";
+            if (item.hidden && !item.achieved) {
+                titleText = "";
+                mainText = "This achievement is hidden.";
+                bottomText = "Achievement Points: " + (item.points ? item.points : "0");
+            } else {
+                titleText = (item.fullLabel ? item.fullLabel : item.label);
+                mainText = item.description();
+                bottomText = "Achievement Points: " + (item.points ? item.points : "0");
+                if (item.achieved) bottomText += "<span style='color: green;'> (You have this achievement.)</span>";
+            }
         }
     }
 
