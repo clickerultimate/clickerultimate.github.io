@@ -38,7 +38,6 @@ body {
     vertical-align: middle;
     cursor: pointer;
     pointer-events: auto;
-    user-select: none;
 }
 
 .button * {
@@ -115,7 +114,6 @@ hr {
     padding: 0px 5px 0px;
     float: left;
     text-align: center;
-    user-select: none;
 }
 
 .rsIndicator {
@@ -212,7 +210,6 @@ hr {
 .jbTitle {
     padding-left: 5px;
     font-size: 1.2vw;
-    user-select: none;
 }
 
 .jbOutline {
@@ -306,14 +303,12 @@ hr {
     float: left;
     padding-left: 8px;
     font-size: 1.2vw;
-    user-select: none;
 }
 
 .advPointsIndicator {
     float: right;
     padding-right: 8px;
     font-size: 1.2vw;
-    user-select: none;
 }
 
 .jbButton.advBought,
@@ -393,7 +388,6 @@ hr {
     padding-top: 10px;
     font-size: 1.2vw;
     text-align: center;
-    user-select: none;
 }
 
 .mnuContainer {
@@ -668,13 +662,10 @@ hr {
     text-align: center;
     padding: 10px;
     box-shadow: 4px 4px 5px 0px #1f1f1f;
-    opacity: 0;
-    transition: 1s;
     padding-left: 4vw;
     border: 1px solid #333333;
     border-radius: 2.5vw 10px 10px 2.5vw;
     padding-right: 1vw;
-    user-select: none;
 }
 
 #achievementPill span {
@@ -707,4 +698,17 @@ hr {
 
 #achLabel {
     font-size: 0.9vw;
+}
+
+/* Browser compatibility fixes */
+.button,
+.mnuTitle,
+.rsBlock,
+.jbTitle,
+.advTitle,
+.advPointsIndicator,
+#achievementPill {
+    -ms-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
 }

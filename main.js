@@ -1091,6 +1091,7 @@ function achieve(ach) {
     achievement.achieved = true;
     game.player.achievementPoints += achievement.points;
 
+    document.getElementById("achievementPill").style.transition = "opacity 1s";
     document.getElementById("achievementPill").style.opacity = 100;
     setTimeout(hideAchievement, 4000);
     if (achievement.hidden) updateContainer("achievements");
