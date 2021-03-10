@@ -818,6 +818,7 @@ function clickResource(what, isAuto = false) {
     if (isAuto) return;
     game.player.totalClicks++;
     updateStatistics();
+    checkClickAchievements();
 }
 
 /**
@@ -2691,6 +2692,13 @@ function updateAvailableUpgrades(active = false) {
     else if (!game.achievements.achTrader.achieved && game.upgrades.upgEconomics.bought) achieve("achTrader");
     else if (!game.achievements.achScholar.achieved && game.upgrades.upgRenaissance.bought) achieve("achScholar");
     else if (!game.achievements.achColonist.achieved && game.player.colonies > 0) achieve("achColonist");
+    else if (!game.achievements.achRebel.achieved && game.upgrades.upgRevolutionAge.bought) achieve("achRebel");
+    else if (!game.achievements.achInformed.achieved && game.player.currentLeaders > 0) achieve("achInformed");
+    else if (!game.achievements.achPioneer.achieved && game.player.colonies >= 5) achieve("achPioneer");
+    else if (!game.achievements.achLuminary.achieved && game.player.colonies >= 10) achieve("achLuminary");
+    else if (!game.achievements.achGreatOne.achieved && game.leaders.ldrAlexander3.bought) achieve("achGreatOne");
+    else if (!game.achievements.achForeman.achieved && game.buildings.stoneQuarry.current >= 15) achieve("achForeman");
+    else if (!game.achievements.achWillOfThePeople.achieved && game.buildings.waterMill.current >= 20 && game.buildings.grainMill.current >= 20 && getAmountTrades() < 1) achieve("achWillOfThePeople");
 
     //leaders
     if (!game.upgrades.upgLeaders.bought) return;
@@ -2711,6 +2719,16 @@ function updateAvailableUpgrades(active = false) {
     if (game.leaders.ldrGalileo.locked && game.player.colonies >= 4 && game.advancements.advMathematics.bought) unlock("ldrGalileo");
     if (game.leaders.ldrKepler.locked && game.player.colonies >= 7 && game.advancements.advMathematics.bought) unlock("ldrKepler");
     if (game.leaders.ldrHancock.locked && game.advancements.advIndependence.bought) unlock("ldrHancock");
+}
+
+/**
+ * Checks for click-related achievements.
+ */
+function checkClickAchievements() {
+    if (!game.achievements.achBeginner.achieved && game.player.totalClicks >= 100) achieve("achBeginner");
+    else if (!game.achievements.achApprentice.achieved && game.player.totalClicks >= 1000) achieve("achApprentice");
+    else if (!game.achievements.achJourneyman.achieved && game.player.totalClicks >= 10000) achieve("achJourneyman");
+    else if (!game.achievements.achExpert.achieved && game.player.totalClicks >= 100000) achieve("achExpert");
 }
 
 /**
