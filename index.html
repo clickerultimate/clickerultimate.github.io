@@ -201,6 +201,9 @@
                         <div class="mnuContentButton button clickable" onclick="switchTheme()">Change Theme</div>
                         <div class="mnuContentInfo">Current Theme: <span id="mnuCurrentTheme">Default (Dark)</span>
                         </div>
+                        <div class="mnuContentButton button clickable" onclick="switchGraphics()">Change Graphics</div>
+                        <div class="mnuContentInfo">Current Graphics: <span id="mnuCurrentGraphics">Default</span>
+                        </div>
                         <div class="mnuContentButton button clickable" onclick="toggleMsgFontSize()">
                             Change Messages Text Size</div>
                         <div class="mnuContentInfo">Current Size: <span id="mnuCurrentMsgSize">Normal</span></div>
@@ -255,7 +258,7 @@
             <span id="pauseLabel">Pause</span>
         </div>
     </div>
-    <div id="achievementPill" style="opacity: 0;" onclick="hideAchievement()">
+    <div id="achievementPill" style="visibility: hidden; opacity: 0;" onclick="hideAchievement()">
         <div class="left">
             <span id="achPoints">0</span>
         </div>

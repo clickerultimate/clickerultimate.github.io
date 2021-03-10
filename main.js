@@ -1091,15 +1091,23 @@ function achieve(ach) {
     achievement.achieved = true;
     game.player.achievementPoints += achievement.points;
 
-    document.getElementById("achievementPill").style.transition = "opacity 1s";
-    document.getElementById("achievementPill").style.opacity = 100;
+    var achievementPill = document.getElementById("achievementPill");
+    achievementPill.style.transition = "visibility 0s linear 0s, opacity 1s";
+    achievementPill.style.visibility = "visible";
+    achievementPill.style.opacity = 1;
     setTimeout(hideAchievement, 4000);
     if (achievement.hidden) updateContainer("achievements");
     updateAchievementValues(true);
 }
 
+/**
+ * Hides the achievement popup.
+ */
 function hideAchievement() {
-    document.getElementById("achievementPill").style.opacity = 0;
+    var achievementPill = document.getElementById("achievementPill");
+    achievementPill.style.transition = "visibility 0s linear 1s, opacity 1s";
+    achievementPill.style.opacity = 0;
+    achievementPill.style.visibility = "hidden";
 }
 
 /**
@@ -2582,6 +2590,7 @@ function updateTheme() {
     if (!availableThemes.includes(game.settings.selectedTheme)) game.settings.selectedTheme = "defaultTheme";
     //Clear previous theme
     document.body.className = "";
+    updateGraphics();
     localStorage.removeItem("theme");
 
     var i = game.global.availableThemes.indexOf(game.settings.selectedTheme);
@@ -2608,6 +2617,26 @@ function switchTheme() {
     game.settings.selectedTheme = toggleOption(game.global.availableThemes, game.settings.selectedTheme);
     localStorage.setItem("theme", game.settings.selectedTheme);
     updateTheme();
+}
+
+/**
+ * Toggles the fancy graphics settings.
+ */
+function switchGraphics() {
+    game.settings.fancyGraphics = !game.settings.fancyGraphics;
+    updateGraphics();
+}
+
+/**
+ * Updates the graphics settings to its new value.
+ */
+function updateGraphics() {
+    if (game.settings.fancyGraphics) {
+        document.body.classList.add("fancy");
+    } else {
+        document.body.classList.remove("fancy");
+    }
+    document.getElementById("mnuCurrentGraphics").innerHTML = game.settings.fancyGraphics ? "Fancy" : "Default";
 }
 
 /**

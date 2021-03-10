@@ -700,6 +700,25 @@ hr {
     font-size: 0.9vw;
 }
 
+/* Fancy Graphics Setting */
+.fancy .rsIndicator {
+    text-shadow: 3px 3px rgb(0 0 0 / 50%);
+}
+
+.fancy #CurrentIronBar,
+.fancy #CurrentSilverBar {
+    box-shadow: inset 5px 5px 10px rgb(0 0 0 / 30%);
+}
+
+.fancy .jbButton,
+.fancy .rsGatherer {
+    box-shadow: inset 10px 10px 10px rgb(0 0 0 / 15%);
+}
+
+.fancy .ribbonButton {
+    box-shadow: inset 0px 5px 5px 5px rgb(0 0 0 / 10%);
+}
+
 /* Browser compatibility fixes */
 .button,
 .mnuTitle,

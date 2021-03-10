@@ -21,6 +21,7 @@ function newGame() {
             selectedMenu: "messages",
             defaultMenu: "Keep Last Tab",
             selectedTheme: "defaultTheme",
+            fancyGraphics: false,
             autoSaveEnabled: true,
             tutorialEnabled: true,
             tutorialCompleted: false,

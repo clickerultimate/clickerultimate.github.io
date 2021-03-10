@@ -66,7 +66,7 @@ body.crimsonTheme {
     --color3: #0b0000;
     --color3Dark: #141414;
     --color4: #0b0000;
-    --color4Alt: #292929;
+    --color4Alt: gray;
     --color5: #eae6e6;
 
     --enabled: #570000;
