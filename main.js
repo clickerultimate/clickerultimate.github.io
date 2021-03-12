@@ -20,6 +20,7 @@ Fix Equestrianism
 Give messages with choice buttons
 Turn millers into bakers with new age
 Add setting to automatically purchase free upgrades
+Have something to spend wood on in early game
 */
 
 /**
@@ -1766,7 +1767,7 @@ function unlock(...what) {
 
         if (itemType == "resources" && item.name.indexOf("Progress") === -1) {
             itemP = getFromText(what[i] + "P");
-        }
+        } else if (itemType == "leaders" && !game.upgrades.upgLeaders.bought) continue;
         item.locked = false;
         if (itemP) itemP.locked = false;
         if (!containers.includes(itemType)) containers.push(itemType);
@@ -2681,44 +2682,27 @@ function updateAvailableUpgrades(active = false) {
 
     //check for achievements
     if (!game.achievements.achThirsty.achieved && game.workers.waterFetcher.current > 0) achieve("achThirsty");
-    else if (!game.achievements.achCaveman.achieved && game.upgrades.upgStoneAge.bought) achieve("achCaveman");
-    else if (!game.achievements.achLight.achieved && game.advancements.advFire.bought) achieve("achLight");
-    else if (!game.achievements.achMasonry.achieved && game.upgrades.upgMasonry.bought) achieve("achMasonry");
-    else if (!game.achievements.achLord.achieved && game.upgrades.upgFeudalAge.bought) achieve("achLord");
     else if (!game.achievements.achMetalCaster.achieved && game.buildings.foundry.current > 0) achieve("achMetalCaster");
     else if (!game.achievements.achHungry.achieved && game.workers.farmer.current > 0) achieve("achHungry");
     else if (!game.achievements.achCraven.achieved && game.workers.waterFetcher.current < 1 && game.workers.lumberjack.current < 1 && game.workers.miner.current > 0) achieve("achCraven");
-    else if (!game.achievements.achDarkTimes.achieved && game.upgrades.upgDarkAge.bought) achieve("achDarkTimes");
-    else if (!game.achievements.achTrader.achieved && game.upgrades.upgEconomics.bought) achieve("achTrader");
-    else if (!game.achievements.achScholar.achieved && game.upgrades.upgRenaissance.bought) achieve("achScholar");
     else if (!game.achievements.achColonist.achieved && game.player.colonies > 0) achieve("achColonist");
-    else if (!game.achievements.achRebel.achieved && game.upgrades.upgRevolutionAge.bought) achieve("achRebel");
     else if (!game.achievements.achInformed.achieved && game.player.currentLeaders > 0) achieve("achInformed");
     else if (!game.achievements.achPioneer.achieved && game.player.colonies >= 5) achieve("achPioneer");
     else if (!game.achievements.achLuminary.achieved && game.player.colonies >= 10) achieve("achLuminary");
-    else if (!game.achievements.achGreatOne.achieved && game.leaders.ldrAlexander3.bought) achieve("achGreatOne");
     else if (!game.achievements.achForeman.achieved && game.buildings.stoneQuarry.current >= 15) achieve("achForeman");
     else if (!game.achievements.achWillOfThePeople.achieved && game.buildings.waterMill.current >= 20 && game.buildings.grainMill.current >= 20 && getAmountTrades() < 1) achieve("achWillOfThePeople");
 
     //leaders
     if (!game.upgrades.upgLeaders.bought) return;
+    if (game.leaders.ldrGilgamesh.locked) unlock("ldrGilgamesh", "ldrPythagoras");
     if (game.leaders.ldrNebuchadnezzar.locked && game.player.colonies >= 3) unlock("ldrNebuchadnezzar");
-    if (game.leaders.ldrLeonidas.locked && game.advancements.advSpear.bought) unlock("ldrLeonidas");
-    if (game.leaders.ldrSocrates.locked && game.upgrades.upgMining.bought) unlock("ldrSocrates");
     if (game.leaders.ldrAlexander3.locked && game.advancements.advTemperance.bought && game.advancements.advFire.bought && game.advancements.advWheel.bought) unlock("ldrAlexander3");
-    if (game.leaders.ldrCicero.locked && game.player.colonies >= 5 && game.upgrades.upgFeudalAge.bought) unlock("ldrCicero");
-    if (game.leaders.ldrCharlemagne.locked && game.upgrades.upgMonarchy.bought) unlock("ldrCharlemagne");
-    else if (game.leaders.ldrCharlemagne.bought) {
+    if (game.leaders.ldrCharlemagne.bought) {
         if (game.upgrades.upgEducation.locked && game.upgrades.upgAgriculture.bought) unlock("upgEducation");
         if (game.upgrades.upgTheology2.locked && game.advancements.advTheology.bought) unlock("upgTheology2");
     }
-    if (game.leaders.ldrDante.locked && game.player.colonies >= 3 && game.upgrades.upgScarcity.bought) unlock("ldrDante");
     if (game.leaders.ldrGutenberg.locked && game.leaders.ldrCharlemagne.bought && game.upgrades.upgRenaissance.bought) unlock("ldrGutenberg");
     else if (game.leaders.ldrGutenberg.bought && game.advancements.advPrintingPress.bought) unlock("advEvangelism", "advArchitecture");
-    if (game.leaders.ldrMagellan.locked && game.player.colonies >= 4 && game.advancements.advMercantilism.bought) unlock("ldrMagellan");
-    if (game.leaders.ldrGalileo.locked && game.player.colonies >= 4 && game.advancements.advMathematics.bought) unlock("ldrGalileo");
-    if (game.leaders.ldrKepler.locked && game.player.colonies >= 7 && game.advancements.advMathematics.bought) unlock("ldrKepler");
-    if (game.leaders.ldrHancock.locked && game.advancements.advIndependence.bought) unlock("ldrHancock");
 }
 
 /**
