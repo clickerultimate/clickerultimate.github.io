@@ -20,7 +20,6 @@ Fix Equestrianism
 Give messages with choice buttons
 Turn millers into bakers with new age
 Add setting to automatically purchase free upgrades
-Have something to spend wood on in early game
 */
 
 /**
@@ -1306,6 +1305,7 @@ function upgradePlayerClickGain(number) {
     if (!number || number == 0) return;
     game.player.clickValue = prettify(game.player.clickValue + number, 2);
     updateStatistics();
+    if (game.player.clickValue >= 2) achieve("achPowerful");
 }
 
 /**
@@ -2690,6 +2690,7 @@ function updateAvailableUpgrades(active = false) {
     else if (!game.achievements.achPioneer.achieved && game.player.colonies >= 5) achieve("achPioneer");
     else if (!game.achievements.achLuminary.achieved && game.player.colonies >= 10) achieve("achLuminary");
     else if (!game.achievements.achForeman.achieved && game.buildings.stoneQuarry.current >= 15) achieve("achForeman");
+    else if (!game.achievements.achSmithy.achieved && game.workers.ironsmith.current >= 25) achieve("achSmithy");
     else if (!game.achievements.achWillOfThePeople.achieved && game.buildings.waterMill.current >= 20 && game.buildings.grainMill.current >= 20 && getAmountTrades() < 1) achieve("achWillOfThePeople");
 
     //leaders
@@ -2709,10 +2710,19 @@ function updateAvailableUpgrades(active = false) {
  * Checks for click-related achievements.
  */
 function checkClickAchievements() {
-    if (!game.achievements.achBeginner.achieved && game.player.totalClicks >= 100) achieve("achBeginner");
-    else if (!game.achievements.achApprentice.achieved && game.player.totalClicks >= 1000) achieve("achApprentice");
-    else if (!game.achievements.achJourneyman.achieved && game.player.totalClicks >= 10000) achieve("achJourneyman");
-    else if (!game.achievements.achExpert.achieved && game.player.totalClicks >= 100000) achieve("achExpert");
+    if (game.player.totalClicks >= 100000) {
+        if (game.achievements.achExpert.achieved) return;
+        achieve("achExpert");
+    } else if (game.player.totalClicks >= 10000) {
+        if (game.achievements.achJourneyman.achieved) return;
+        achieve("achJourneyman");
+    } else if (game.player.totalClicks >= 1000) {
+        if (game.achievements.achApprentice.achieved) return;
+        achieve("achApprentice");
+    } else if (game.player.totalClicks >= 100) {
+        if (game.achievements.achBeginner.achieved) return;
+        achieve("achBeginner");
+    }
 }
 
 /**

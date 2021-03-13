@@ -1074,8 +1074,8 @@ function newGame() {
             },
             trdAdvancementPoint2: {
                 name: "trdAdvancementPoint2",
-                label: "Adv. Point II",
-                fullLabel: "Advancement Point II",
+                label: "Advancement Point",
+                fullLabel: "Advancement Point (II)",
                 description: function () {
                     return "Purchase an <b>Advancement Point</b>. Each point costs more <b>Gold</b> than the last.";
                 },
@@ -1988,7 +1988,21 @@ function newGame() {
                         base: 10
                     }
                 },
-                effect: function () { upgradeMaxValue("wood", this.woodMax); upgradeMaxValue("stone", this.stoneMax); },
+                effect: function () { upgradeMaxValue("wood", this.woodMax); upgradeMaxValue("stone", this.stoneMax); unlock("upgWoodenBasin"); },
+                locked: true,
+                bought: false
+            },
+            upgWoodenBasin: {
+                name: "upgWoodenBasin",
+                label: "Wooden Basin",
+                description: function () { return "With some experimentation, you manage to craft what looks like bigger versions of water buckets. Your <b>Water Fetchers</b> will gather by <b>+" + this.rate + " per second</b>."; },
+                rate: 0.1,
+                resourceCost: {
+                    wood: {
+                        base: 100
+                    }
+                },
+                effect: function () { upgradeWorkerRate("waterFetcher", this.rate); },
                 locked: true,
                 bought: false
             },
@@ -4793,6 +4807,14 @@ function newGame() {
                 hidden: false,
                 achieved: false
             },
+            achPowerful: {
+                name: "achPowerful",
+                label: "Powerful",
+                description: function () { return "You reached a <b>Base Click Power</b> of <b>200%</b>. Each one of your clicks is a mighty force to be reckoned with."; },
+                points: 1,
+                hidden: true,
+                achieved: false
+            },
             achThirsty: {
                 name: "achThirsty",
                 label: "Thirsty",
@@ -4813,6 +4835,15 @@ function newGame() {
                 name: "achCraven",
                 label: "Craven",
                 description: function () { return "Hire your first <b>Miner</b> without having a single <b>Water Fetcher</b> or <b>Lumberjack</b> under your employ. Why would you do this?"; },
+                points: 1,
+                hidden: false,
+                achieved: false
+            },
+            achSmithy: {
+                name: "achSmithy",
+                label: "Smithy",
+                fullLabel: "Back to the Smithy with you",
+                description: function () { return "Hire a total of <b>25 Ironsmiths</b>. Wait a minute, are you even paying these people?"; },
                 points: 1,
                 hidden: false,
                 achieved: false
