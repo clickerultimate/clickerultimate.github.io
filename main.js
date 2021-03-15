@@ -347,8 +347,8 @@ function sendMessages() {
             var paras = document.getElementsByClassName('msgSave');
             while (paras[0]) {
                 paras[0].parentNode.removeChild(paras[0]);
+                number--;
             }
-            number--;
         }
         else if (message.type == "warning") elem += "msgWarning";
         else if (message.type == "tutorial") elem += "msgTutorial";
@@ -571,6 +571,7 @@ function importLoad() {
 function toggleAutosave() {
     game.settings.autoSaveEnabled = !game.settings.autoSaveEnabled;
     updateAutosaveButton();
+    clearTimeout(autosaveTimer);
     autoSave();
 }
 
@@ -580,7 +581,7 @@ function toggleAutosave() {
 function autoSave() {
     if (!game.settings.autoSaveEnabled) return;
     save();
-    setTimeout(autoSave, 60000);
+    autosaveTimer = setTimeout(autoSave, 60000);
 }
 
 /**
@@ -610,6 +611,7 @@ function save(isExport) {
         if (localStorage.getItem("ClickerUltisvg") == saveString) {
             var d = new Date();
             message("Game Saved (" + d.getHours() + ":" + d.getMinutes().toString().padStart(2, "0") + ")", "save");
+            autosaving = false;
             localStorage.removeItem("theme");
         } else {
             message("Unable to save game. Please use the export feature instead to back up your progress.", "warning");
@@ -666,7 +668,7 @@ function load(saveString) {
     }
 
     oldVersion = (saveGame.global.version) ? saveGame.global.version.split('.') : null;
-    if (oldVersion && oldVersion.length && isVersionNewer(oldVersion, game.global.version.split('.'))) {
+    if (fromImport && oldVersion && oldVersion.length && isVersionNewer(oldVersion, game.global.version.split('.'))) {
         message("The imported string is from a newer version of the game. Please refresh your browser to get the latest version.", "warning");
         return false;
     }
@@ -3312,6 +3314,6 @@ setTimeout(gameTimeout, (1000 / game.global.speed));
 //unhide body
 document.body.classList.remove("locked");
 //save game every minute
-setTimeout(autoSave, 60000);
+var autosaveTimer = setTimeout(autoSave, 60000);
 //display tips for user
 var tutorialID = setTimeout(randomTip, 300000);
