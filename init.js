@@ -1,8 +1,8 @@
 function newGame() {
     var initData = {
         global: {
-            version: "0.2.03",
-            latestChanges: "Doubled the amount of achievements. Fixed some glitches in the UI.",
+            version: "0.2.04",
+            latestChanges: "New achievements, UI tweaks, optimization and a few bug fixes.",
             start: new Date().getTime(),
             time: 0,
             speed: 10,
@@ -1205,9 +1205,9 @@ function newGame() {
                     }
                 },
                 effect: function () {
-                    var adv = game.advancements.advMathematics;
-                    unlock(adv.name);
+                    unlock("advMathematics");
                     if (game.leaders.ldrPythagoras.bought) buyAdvancement(adv, true);
+                    achieve("achRepublic");
                 },
                 personality: "wise",
                 favored: ["advMathematics", "advTemperance", "advValor", "advLogos"],
@@ -3885,7 +3885,7 @@ function newGame() {
                 parent: "upgDarkAge",
                 description: function () { return "Propagate your ideals to your population swiftly by appointing chosen preachers to guide the masses. Adds a <b>Church</b> building which will toll your workers but provide resources in exchange."; },
                 advCost: 1,
-                effect: function () { unlock("church"); },
+                effect: function () { unlock("church"); achieve("achTheologian"); },
                 locked: true,
                 bought: false
             },
@@ -4734,6 +4734,14 @@ function newGame() {
                 hidden: true,
                 achieved: false
             },
+            achPatrician: {
+                name: "achPatrician",
+                label: "Patrician",
+                description: function () { return "The breadth and reach of your influence is immeasurable. Your empire now spawns a sprawling total of <b>30 Colonies</b>."; },
+                points: 3,
+                hidden: true,
+                achieved: false
+            },
             achCaveman: {
                 name: "achCaveman",
                 label: "Caveman",
@@ -4857,6 +4865,15 @@ function newGame() {
                 hidden: false,
                 achieved: false
             },
+            achTheologian: {
+                name: "achTheologian",
+                label: "Theologian",
+                fullLabel: "Theologian",
+                description: function () { return "Research the <b>Theology</b> advancement."; },
+                points: 1,
+                hidden: false,
+                achieved: false
+            },
             achMasonry: {
                 name: "achMasonry",
                 label: "Going Somewhere",
@@ -4888,6 +4905,14 @@ function newGame() {
                 description: function () { return "You traded <b>Gold</b> for an <b>Achievement Point</b>. What else is money good for, really?"; },
                 points: 0,
                 hidden: true,
+                achieved: false
+            },
+            achPolymath: {
+                name: "achPolymath",
+                label: "Polymath",
+                description: function () { return "Perform a total of <b>100 Trades</b> and purchase a total of <b>100 Upgrades</b> in a single colony. Embody the art of micromanagement."; },
+                points: 1,
+                hidden: false,
                 achieved: false
             },
             achMetalCaster: {
@@ -4926,6 +4951,14 @@ function newGame() {
                 name: "achGreatOne",
                 label: "The Great One",
                 description: function () { return "You have acquired <b>Alexander The Great</b> as one of your counselors. Your enemies should be afraid."; },
+                points: 1,
+                hidden: true,
+                achieved: false
+            },
+            achRepublic: {
+                name: "achRepublic",
+                label: "Republic",
+                description: function () { return "You have acquired <b>Plato</b> as one of your counselors. Go forth and build a prosperous city."; },
                 points: 1,
                 hidden: true,
                 achieved: false

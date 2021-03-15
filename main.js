@@ -672,7 +672,13 @@ function load(saveString) {
     }
 
     //Compatibility checks
-    //if (isVersionNewer([0, 0, 18], oldVersion)) return false; //can't keep these saves sorry.
+    if (isVersionNewer([0, 2, 4], oldVersion)) {
+        var i = 0;
+        for (var ach in saveGame.achievements) {
+            if (game.achievements[ach] && saveGame.achievements[ach].achieved) i += game.achievements[ach].points;
+        }
+        saveGame.player.achievementPoints = i;
+    }
 
     //Reset game
     game = replaceValueBy(newGame(), saveGame);
@@ -1547,6 +1553,30 @@ function getAmountUpgrades() {
 }
 
 /**
+ * Returns the current total amount of prestiges bought.
+ */
+function getAmountPrestiges() {
+    var number = 0;
+    for (var ptg in game.prestiges) {
+        if (game.prestiges[ptg].locked || !game.prestiges[ptg].bought) continue;
+        number++;
+    }
+    return number;
+}
+
+/**
+ * Returns the current total amount of achievements atained.
+ */
+ function getAmountAchievements() {
+    var number = 0;
+    for (var ach in game.achievements) {
+        if (!game.achievements[ach].achieved) continue;
+        number++;
+    }
+    return number;
+}
+
+/**
  * Returns the current age the player is on.
  */
 function getCurrentAge() {
@@ -2352,7 +2382,8 @@ function prestigeReset() {
             gold: Math.round(game.player.gold * game.player.nextGoldRate),
             advancementPoints: (game.player.advancementPoints + game.player.nextAdvancementPoints),
             prestigePoints: (game.player.prestigePoints + game.player.nextPrestigePoints),
-            prestigeUnlocked: true
+            prestigeUnlocked: true,
+            achievementPoints: game.player.achievementPoints
         }
     };
     carryover.global = game.global;
@@ -2538,7 +2569,9 @@ function lockStatistics() {
         "mnuStatsLabelAdvancements", "mnuStatsCurrentAdvancements",
         "mnuStatsLabelWorkerCost", "mnuStatsCurrentWorkerCost",
         "mnuStatsLabelBuildingCost", "mnuStatsCurrentBuildingCost",
-        "mnuStatsLabelLeaders", "mnuStatsCurrentLeaders"
+        "mnuStatsLabelLeaders", "mnuStatsCurrentLeaders",
+        "mnuStatsLabelPrestiges", "mnuStatsCurrentPrestiges",
+        "mnuStatsLabelAchievements", "mnuStatsCurrentAchievements"
     ];
     for (var i in elems) {
         document.getElementById(elems[i]).classList.add("locked");
@@ -2549,30 +2582,68 @@ function lockStatistics() {
  * Displays the current Statistic values.
  */
 function updateStatistics() {
-    document.getElementById("mnuStatsCurrentName").innerHTML = getEmpireName();
+    setElement("mnuStatsCurrentName", getEmpireName());
     var age = getCurrentAge();
-    document.getElementById("mnuStatsCurrentAge").innerHTML = age;
+    setElement("mnuStatsCurrentAge", age);
     if (age != "-") {
-        document.getElementById("mnuStatsLabelAge").classList.remove("locked");
-        document.getElementById("mnuStatsCurrentAge").classList.remove("locked");
+        unhideElement("mnuStatsLabelAge");
+        unhideElement("mnuStatsCurrentAge");
     }
-    document.getElementById("mnuStatsColony").innerHTML = game.player.colonies;
+    setElement("mnuStatsColony", game.player.colonies);
+    setElement("mnuStatsCurrentPrestiges", prettify(getAmountPrestiges(), 0, true));
     if (game.player.colonies > 0) {
-        document.getElementById("mnuStatsLabelColony").classList.remove("locked");
-        document.getElementById("mnuStatsColony").classList.remove("locked");
+        unhideElement("mnuStatsLabelColony");
+        unhideElement("mnuStatsColony");
+        unhideElement("mnuStatsLabelPrestiges");
+        unhideElement("mnuStatsCurrentPrestiges");
     }
-    document.getElementById("mnuStatsCurrentClicks").innerHTML = prettify(game.player.totalClicks, 0, true);
-    document.getElementById("mnuStatsCurrentWorkers").innerHTML = prettify(getAmountWorkers(), 0, true);
-    document.getElementById("mnuStatsCurrentBuildings").innerHTML = prettify(getAmountBuildings(), 0, true);
-    document.getElementById("mnuStatsCurrentTrades").innerHTML = prettify(getAmountTrades(), 0, true);
-    document.getElementById("mnuStatsCurrentUpgrades").innerHTML = prettify(getAmountUpgrades(), 0, true);
-    document.getElementById("mnuStatsCurrentLeaders").textContent = game.player.currentLeaders + " / " + game.player.maxLeaders;
-    document.getElementById("mnuStatsCurrentAdvancements").innerHTML = prettify(getAmountAdvancements(), 0, true);
-    document.getElementById("mnuStatsCurrentClickPower").innerHTML = prettify(game.player.clickValue * 100, 2, true) + "%";
-    document.getElementById("mnuStatsCurrentParentValue").innerHTML = prettify(game.player.parentValue * 100, 2, true) + "%";
-    document.getElementById("mnuStatsCurrentWorkerCost").innerHTML = prettify(game.player.workerCost * 100, 2, true) + "%";
-    document.getElementById("mnuStatsCurrentBuildingCost").innerHTML = prettify(game.player.buildingCost * 100, 2, true) + "%";
-    document.getElementById("mnuStatsCurrentUpgradeCost").innerHTML = prettify(game.player.upgradeCost * 100, 2, true) + "%";
+    var ach = getAmountAchievements();
+    setElement("mnuStatsCurrentAchievements", prettify(ach, 0, true));
+    if (ach > 0) {
+        unhideElement("mnuStatsLabelAchievements");
+        unhideElement("mnuStatsCurrentAchievements");
+    }
+    setElement("mnuStatsCurrentClicks", prettify(game.player.totalClicks, 0, true));
+    setElement("mnuStatsCurrentWorkers", prettify(getAmountWorkers(), 0, true));
+    setElement("mnuStatsCurrentBuildings", prettify(getAmountBuildings(), 0, true));
+    setElement("mnuStatsCurrentTrades", prettify(getAmountTrades(), 0, true));
+    setElement("mnuStatsCurrentUpgrades", prettify(getAmountUpgrades(), 0, true));
+    setElement("mnuStatsCurrentLeaders", game.player.currentLeaders + " / " + game.player.maxLeaders);
+    setElement("mnuStatsCurrentAdvancements", prettify(getAmountAdvancements(), 0, true));
+    setElement("mnuStatsCurrentClickPower", prettify(game.player.clickValue * 100, 2, true) + "%");
+    setElement("mnuStatsCurrentParentValue", prettify(game.player.parentValue * 100, 2, true) + "%");
+    setElement("mnuStatsCurrentWorkerCost", prettify(game.player.workerCost * 100, 2, true) + "%");
+    setElement("mnuStatsCurrentBuildingCost", prettify(game.player.buildingCost * 100, 2, true) + "%");
+    setElement("mnuStatsCurrentUpgradeCost", prettify(game.player.upgradeCost * 100, 2, true) + "%");
+}
+
+/**
+ * Sets an HTML element to a provided value. Use to catch missing elements.
+ * 
+ * @param {string} elementId The ID of the HTML element to edit.
+ * @param {string} value The value to set in the innerHTML param.
+ */
+function setElement(elementId, value) {
+    var element = document.getElementById(elementId);
+    if (!element) {
+        message("A new version was detected. Please Save your game and refresh the page to get it.", "warning");
+        return;
+    }
+    element.textContent = value;
+}
+
+/**
+ * Unhides an HTML element. Use to catch missing elements.
+ * 
+ * @param {string} elementId The ID of the HTML element to display.
+ */
+function unhideElement(elementId) {
+    var element = document.getElementById(elementId);
+    if (!element) {
+        message("A new version was detected. Please Save your game and refresh the page to get it.", "warning");
+        return;
+    }
+    element.classList.remove("locked");
 }
 
 /**
@@ -2692,6 +2763,8 @@ function updateAvailableUpgrades(active = false) {
     else if (!game.achievements.achForeman.achieved && game.buildings.stoneQuarry.current >= 15) achieve("achForeman");
     else if (!game.achievements.achSmithy.achieved && game.workers.ironsmith.current >= 25) achieve("achSmithy");
     else if (!game.achievements.achWillOfThePeople.achieved && game.buildings.waterMill.current >= 20 && game.buildings.grainMill.current >= 20 && getAmountTrades() < 1) achieve("achWillOfThePeople");
+    else if (!game.achievements.achPolymath.achieved && getAmountTrades() >= 100 && getAmountUpgrades() >= 100) achieve("achPolymath");
+    else if (!game.achievements.achPatrician.achieved && game.player.colonies >= 30) achieve("achPatrician");
 
     //leaders
     if (!game.upgrades.upgLeaders.bought) return;
