@@ -1,8 +1,8 @@
 function newGame() {
     var initData = {
         global: {
-            version: "0.2.03",
-            latestChanges: "Doubled the amount of achievements. Fixed some glitches in the UI.",
+            version: "0.2.04",
+            latestChanges: "New achievements, UI tweaks, optimization and a few bug fixes.",
             start: new Date().getTime(),
             time: 0,
             speed: 10,
@@ -1074,8 +1074,8 @@ function newGame() {
             },
             trdAdvancementPoint2: {
                 name: "trdAdvancementPoint2",
-                label: "Adv. Point II",
-                fullLabel: "Advancement Point II",
+                label: "Advancement Point",
+                fullLabel: "Advancement Point (II)",
                 description: function () {
                     return "Purchase an <b>Advancement Point</b>. Each point costs more <b>Gold</b> than the last.";
                 },
@@ -1205,9 +1205,9 @@ function newGame() {
                     }
                 },
                 effect: function () {
-                    var adv = game.advancements.advMathematics;
-                    unlock(adv.name);
+                    unlock("advMathematics");
                     if (game.leaders.ldrPythagoras.bought) buyAdvancement(adv, true);
+                    achieve("achRepublic");
                 },
                 personality: "wise",
                 favored: ["advMathematics", "advTemperance", "advValor", "advLogos"],
@@ -1232,6 +1232,7 @@ function newGame() {
                     unlock(adv1.name, adv2.name);
                     buyAdvancement(adv1, true);
                     buyAdvancement(adv2, true);
+                    achieve("achGreatOne");
                 },
                 personality: "stern",
                 favored: ["advWheel", "advFervor", "advSilverMastery"],
@@ -1455,7 +1456,7 @@ function newGame() {
                 description: function () { return "You've learned from experience that colonies don't just run themselves. Set out to find the most talented members of your civilization. Allows you to recruit a <b>Leader</b> for every colony you build."; },
                 type: "free",
                 resourceCost: {},
-                effect: function () { unlock("ldrGilgamesh", "ldrPythagoras"); tutorialMessage("leaders"); },
+                effect: function () { tutorialMessage("leaders"); },
                 locked: true,
                 bought: false
             },
@@ -1760,7 +1761,13 @@ function newGame() {
                         base: 25
                     }
                 },
-                effect: function () { unlock("stone", "miner", "upgStoneBucket", "upgStoneAxe", "upgStonePickaxe"); upgradeMaxValue("water", this.rate); upgradeMaxValue("wood", this.rate); tutorialMessage("highprogress"); tutorialMessage("workers2"); },
+                effect: function () {
+                    unlock("stone", "miner", "upgStoneBucket", "upgStoneAxe", "upgStonePickaxe", "ldrSocrates");
+                    upgradeMaxValue("water", this.rate);
+                    upgradeMaxValue("wood", this.rate);
+                    tutorialMessage("highprogress");
+                    tutorialMessage("workers2");
+                },
                 locked: true,
                 bought: false
             },
@@ -1853,6 +1860,7 @@ function newGame() {
                     unlock("waterMill");
                     tutorialMessage("buildings");
                     if (game.player.colonies >= 8) unlock("upgWaterMill");
+                    achieve("achMasonry");
                 },
                 locked: true,
                 bought: false
@@ -1980,7 +1988,21 @@ function newGame() {
                         base: 10
                     }
                 },
-                effect: function () { upgradeMaxValue("wood", this.woodMax); upgradeMaxValue("stone", this.stoneMax); },
+                effect: function () { upgradeMaxValue("wood", this.woodMax); upgradeMaxValue("stone", this.stoneMax); unlock("upgWoodenBasin"); },
+                locked: true,
+                bought: false
+            },
+            upgWoodenBasin: {
+                name: "upgWoodenBasin",
+                label: "Wooden Basin",
+                description: function () { return "With some experimentation, you manage to craft what looks like bigger versions of water buckets. Your <b>Water Fetchers</b> will gather by <b>+" + this.rate + " per second</b>."; },
+                rate: 0.1,
+                resourceCost: {
+                    wood: {
+                        base: 100
+                    }
+                },
+                effect: function () { upgradeWorkerRate("waterFetcher", this.rate); },
                 locked: true,
                 bought: false
             },
@@ -2245,7 +2267,7 @@ function newGame() {
                     }
                 },
                 effect: function () {
-                    unlock("upgAgriculture", "ironsmith", "upgFoundations");
+                    unlock("upgAgriculture", "ironsmith", "upgFoundations", "ldrCharlemagne");
                     upgradeWorkerRate("miner", this.rate);
                     if (game.player.colonies >= 3) unlock("upgTenacity");
                 },
@@ -2467,7 +2489,11 @@ function newGame() {
                         base: 50
                     }
                 },
-                effect: function () { upgradeWorkerCostRate("waterFetcher", "water", this.rate); unlock("upgScarcity2"); },
+                effect: function () {
+                    upgradeWorkerCostRate("waterFetcher", "water", this.rate);
+                    unlock("upgScarcity2");
+                    if (game.player.colonies >= 3) unlock("ldrDante");
+                },
                 locked: true,
                 bought: false
             },
@@ -2834,7 +2860,7 @@ function newGame() {
                         base: 15
                     }
                 },
-                effect: function () { unlock("trdGold", "trdTax", "trdPropertyTax", "trdAdvancementPoint", "upgGloves", "upgBoots", "upgWaterStock", "upgWoodStock", "upgStoneStock", "upgIronStock", "upgWheatStock"); tutorialMessage("tax"); },
+                effect: function () { unlock("trdGold", "trdTax", "trdPropertyTax", "trdAdvancementPoint", "upgGloves", "upgBoots", "upgWaterStock", "upgWoodStock", "upgStoneStock", "upgIronStock", "upgWheatStock"); tutorialMessage("tax"); achieve("achTrader"); },
                 locked: true,
                 bought: false
             },
@@ -3500,7 +3526,14 @@ function newGame() {
                 },
                 type: "age",
                 rate: 0.1,
-                effect: function () { advanceAge(this, 1); upgradeWorkerRate("lumberjack", this.rate); unlock("upgMining", "upgWoodCart", "advancements"); tutorialMessage("advancements"); tutorialMessage("ages"); },
+                effect: function () {
+                    advanceAge(this, 1);
+                    upgradeWorkerRate("lumberjack", this.rate);
+                    unlock("upgMining", "upgWoodCart", "advancements");
+                    tutorialMessage("advancements");
+                    tutorialMessage("ages");
+                    achieve("achCaveman");
+                },
                 locked: true,
                 bought: false
             },
@@ -3539,6 +3572,8 @@ function newGame() {
                     upgradeMaxValue("wood", this.woodMax);
                     upgradeMaxValue("stone", this.stoneMax);
                     tutorialMessage("upgrades");
+                    achieve("achLord");
+                    if (game.player.colonies >= 5) unlock("ldrCicero");
                 },
                 locked: true,
                 bought: false
@@ -3587,6 +3622,7 @@ function newGame() {
                     upgradeMaxValue("stone", this.rate);
                     upgradeMaxValue("iron", this.rate);
                     upgradeMaxValue("wheat", this.rate);
+                    achieve("achDarkTimes");
                 },
                 locked: true,
                 bought: false
@@ -3636,6 +3672,7 @@ function newGame() {
                     upgradeMaxValue("silverP", this.silverMax);
                     tutorialMessage("prestige");
                     finishTutorial();
+                    achieve("achScholar");
                 },
                 locked: true,
                 bought: false
@@ -3681,6 +3718,7 @@ function newGame() {
                     upgradeMaxValue("diamondP", this.diamondMax);
                     upgradeTradeCost("trdTax", this.taxIncrease, "silver");
                     upgradeTradeCost("trdPropertyTax", this.taxIncrease, "silver");
+                    achieve("achRebel");
                 },
                 locked: true,
                 bought: false
@@ -3707,7 +3745,7 @@ function newGame() {
                 description: function () { return "Major civilizational breakthrough that will grant <b>" + prettify(this.clickRate * 100, 2, true) + "% more resource progress</b> when <b>clicking to gather resources</b>. This effect compounds with other clicking-related upgrades."; },
                 advCost: 1,
                 clickRate: 0.3,
-                effect: function () { upgradePlayerClickGain(this.clickRate); },
+                effect: function () { upgradePlayerClickGain(this.clickRate); achieve("achLight"); },
                 locked: true,
                 bought: false
             },
@@ -3729,7 +3767,7 @@ function newGame() {
                 description: function () { return "Through trial and error, you discover a deadly combination of sculpted wood and sharpened stone. Gain <b>" + prettify(this.clickRate * 100, 2, true) + "% more resource progress</b> when <b>clicking to gather resources</b>."; },
                 advCost: 1,
                 clickRate: 0.15,
-                effect: function () { upgradePlayerClickGain(this.clickRate); unlock("advSword"); },
+                effect: function () { upgradePlayerClickGain(this.clickRate); unlock("advSword", "ldrLeonidas"); },
                 locked: true,
                 bought: false,
                 secret: true
@@ -3847,7 +3885,7 @@ function newGame() {
                 parent: "upgDarkAge",
                 description: function () { return "Propagate your ideals to your population swiftly by appointing chosen preachers to guide the masses. Adds a <b>Church</b> building which will toll your workers but provide resources in exchange."; },
                 advCost: 1,
-                effect: function () { unlock("church"); },
+                effect: function () { unlock("church"); achieve("achTheologian"); },
                 locked: true,
                 bought: false
             },
@@ -3927,7 +3965,11 @@ function newGame() {
                 description: function () { return "Advanced understanding of mathematical principles begin to arise in your population, paving the way to future improvements.  Applies a <b>20%</b> cost reduction on all upgrades. This does not apply to <b>Age Upgrades</b>."; },
                 advCost: 2,
                 rate: -0.2,
-                effect: function () { upgradeUpgradeCost(this.rate); },
+                effect: function () {
+                    upgradeUpgradeCost(this.rate);
+                    if (game.player.colonies >= 7) unlock("ldrKepler");
+                    else if (game.player.colonies >= 4) unlock("ldrGalileo");
+                },
                 locked: true,
                 bought: false
             },
@@ -3937,7 +3979,10 @@ function newGame() {
                 parent: "upgRenaissance",
                 description: function () { return "Major development in commerce allows you to perform <b>Additional Trades</b> to manipulate the market to your advantage."; },
                 advCost: 2,
-                effect: function () { unlock("trdWater2", "trdWood2", "trdStone2", "trdIron2", "trdWheat"); },
+                effect: function () {
+                    unlock("trdWater2", "trdWood2", "trdStone2", "trdIron2", "trdWheat");
+                    if (game.player.colonies >= 4) unlock("ldrMagellan");
+                },
                 locked: true,
                 bought: false
             },
@@ -4005,7 +4050,7 @@ function newGame() {
                 advCost: 3,
                 rate: 0.5,
                 maxRate: 2,
-                effect: function () { buyPassive(getFromText("psvIndependence")); game.player.nextAdvancementPoints += this.maxRate; },
+                effect: function () { buyPassive(getFromText("psvIndependence")); game.player.nextAdvancementPoints += this.maxRate; unlock("ldrHancock"); },
                 locked: true,
                 bought: false
             },
@@ -4689,6 +4734,14 @@ function newGame() {
                 hidden: true,
                 achieved: false
             },
+            achPatrician: {
+                name: "achPatrician",
+                label: "Patrician",
+                description: function () { return "The breadth and reach of your influence is immeasurable. Your empire now spawns a sprawling total of <b>30 Colonies</b>."; },
+                points: 3,
+                hidden: true,
+                achieved: false
+            },
             achCaveman: {
                 name: "achCaveman",
                 label: "Caveman",
@@ -4762,6 +4815,14 @@ function newGame() {
                 hidden: false,
                 achieved: false
             },
+            achPowerful: {
+                name: "achPowerful",
+                label: "Powerful",
+                description: function () { return "You reached a <b>Base Click Power</b> of <b>200%</b>. Each one of your clicks is a mighty force to be reckoned with."; },
+                points: 1,
+                hidden: true,
+                achieved: false
+            },
             achThirsty: {
                 name: "achThirsty",
                 label: "Thirsty",
@@ -4786,12 +4847,30 @@ function newGame() {
                 hidden: false,
                 achieved: false
             },
+            achSmithy: {
+                name: "achSmithy",
+                label: "Smithy",
+                fullLabel: "Back to the Smithy with you",
+                description: function () { return "Hire a total of <b>25 Ironsmiths</b>. Wait a minute, are you even paying these people?"; },
+                points: 1,
+                hidden: false,
+                achieved: false
+            },
             achLight: {
                 name: "achLight",
                 label: "Light",
                 fullLabel: "Let There Be Light",
                 description: function () { return "Discover <b>Fire</b>."; },
                 points: 0,
+                hidden: false,
+                achieved: false
+            },
+            achTheologian: {
+                name: "achTheologian",
+                label: "Theologian",
+                fullLabel: "Theologian",
+                description: function () { return "Research the <b>Theology</b> advancement."; },
+                points: 1,
                 hidden: false,
                 achieved: false
             },
@@ -4826,6 +4905,14 @@ function newGame() {
                 description: function () { return "You traded <b>Gold</b> for an <b>Achievement Point</b>. What else is money good for, really?"; },
                 points: 0,
                 hidden: true,
+                achieved: false
+            },
+            achPolymath: {
+                name: "achPolymath",
+                label: "Polymath",
+                description: function () { return "Perform a total of <b>100 Trades</b> and purchase a total of <b>100 Upgrades</b> in a single colony. Embody the art of micromanagement."; },
+                points: 1,
+                hidden: false,
                 achieved: false
             },
             achMetalCaster: {
@@ -4864,6 +4951,14 @@ function newGame() {
                 name: "achGreatOne",
                 label: "The Great One",
                 description: function () { return "You have acquired <b>Alexander The Great</b> as one of your counselors. Your enemies should be afraid."; },
+                points: 1,
+                hidden: true,
+                achieved: false
+            },
+            achRepublic: {
+                name: "achRepublic",
+                label: "Republic",
+                description: function () { return "You have acquired <b>Plato</b> as one of your counselors. Go forth and build a prosperous city."; },
                 points: 1,
                 hidden: true,
                 achieved: false
