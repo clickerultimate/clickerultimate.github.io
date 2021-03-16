@@ -93,6 +93,7 @@ function gameLoop(exhaustTick) {
 
     if (!exhaustTick) {
         sendMessages();
+        sendAchievements();
     }
 }
 
@@ -160,8 +161,8 @@ function toggleTutorial() {
     if (game.settings.tutorialEnabled) game.settings.tutorialEnabled = false;
     else game.settings.tutorialEnabled = true;
     updateTutorialSetting();
-    clearTimeout(tutorialID);
-    if (game.settings.tutorialCompleted && game.settings.tutorialEnabled) tutorialID = setTimeout(randomTip, 300000);
+    clearTimeout(tutorialTimer);
+    if (game.settings.tutorialCompleted && game.settings.tutorialEnabled) tutorialTimer = setTimeout(randomTip, 300000);
 }
 
 /**
@@ -508,7 +509,7 @@ function tutorialMessage(type) {
 function finishTutorial() {
     if (game.settings.tutorialCompleted) return;
     game.settings.tutorialCompleted = true;
-    tutorialID = setTimeout(randomTip, 300000);
+    tutorialTimer = setTimeout(randomTip, 300000);
 }
 
 /**
@@ -571,6 +572,7 @@ function importLoad() {
 function toggleAutosave() {
     game.settings.autoSaveEnabled = !game.settings.autoSaveEnabled;
     updateAutosaveButton();
+    clearTimeout(autosaveTimer);
     autoSave();
 }
 
@@ -580,7 +582,7 @@ function toggleAutosave() {
 function autoSave() {
     if (!game.settings.autoSaveEnabled) return;
     save();
-    setTimeout(autoSave, 60000);
+    autosaveTimer = setTimeout(autoSave, 60000);
 }
 
 /**
@@ -610,6 +612,7 @@ function save(isExport) {
         if (localStorage.getItem("ClickerUltisvg") == saveString) {
             var d = new Date();
             message("Game Saved (" + d.getHours() + ":" + d.getMinutes().toString().padStart(2, "0") + ")", "save");
+            autosaving = false;
             localStorage.removeItem("theme");
         } else {
             message("Unable to save game. Please use the export feature instead to back up your progress.", "warning");
@@ -666,7 +669,7 @@ function load(saveString) {
     }
 
     oldVersion = (saveGame.global.version) ? saveGame.global.version.split('.') : null;
-    if (oldVersion && oldVersion.length && isVersionNewer(oldVersion, game.global.version.split('.'))) {
+    if (fromImport && oldVersion && oldVersion.length && isVersionNewer(oldVersion, game.global.version.split('.'))) {
         message("The imported string is from a newer version of the game. Please refresh your browser to get the latest version.", "warning");
         return false;
     }
@@ -1083,6 +1086,7 @@ function buyPassive(passive) {
         recalculateResRate(resource);
         updateResRateValues(resource, true);
     }
+    achieve("achSleeper");
 }
 
 /**
@@ -1093,28 +1097,46 @@ function buyPassive(passive) {
 function achieve(ach) {
     var achievement = getFromText(ach);
     if (!achievement || !achievement.label || achievement.achieved) return;
-    document.getElementById("achLabel").innerHTML = (achievement.fullLabel ? achievement.fullLabel : achievement.label);
-    document.getElementById("achPoints").innerHTML = achievement.points ? achievement.points : 0;
+    game.global.achievements.push(achievement);
     achievement.achieved = true;
     game.player.achievementPoints += achievement.points;
+    if (achievement.hidden) updateContainer("achievements");
+    updateAchievementValues(true);
+}
+
+/**
+ * Sends the achievements out to the screen.
+ */
+var achievementTimer = 0;
+function sendAchievements() {
+    if (achievementTimer != 0 || game.global.achievements.length <= 0) return;
+    var achievement = game.global.achievements.shift();
+
+    document.getElementById("achLabel").innerHTML = (achievement.fullLabel ? achievement.fullLabel : achievement.label);
+    document.getElementById("achPoints").innerHTML = achievement.points ? achievement.points : 0;
 
     var achievementPill = document.getElementById("achievementPill");
     achievementPill.style.transition = "visibility 0s linear 0s, opacity 1s";
     achievementPill.style.visibility = "visible";
     achievementPill.style.opacity = 1;
-    setTimeout(hideAchievement, 4000);
-    if (achievement.hidden) updateContainer("achievements");
-    updateAchievementValues(true);
+    achievementTimer = setTimeout(hideAchievement, 4000);
 }
 
 /**
  * Hides the achievement popup.
  */
 function hideAchievement() {
+    clearTimeout(achievementTimer);
+    achievementTimer = 0;
+    if (game.global.achievements.length > 0) {
+        sendingAchievements = false;
+        return;
+    }
     var achievementPill = document.getElementById("achievementPill");
     achievementPill.style.transition = "visibility 0s linear 1s, opacity 1s";
     achievementPill.style.opacity = 0;
     achievementPill.style.visibility = "hidden";
+    sendingAchievements = false;
 }
 
 /**
@@ -1311,7 +1333,7 @@ function upgradePlayerClickGain(number) {
     if (!number || number == 0) return;
     game.player.clickValue = prettify(game.player.clickValue + number, 2);
     updateStatistics();
-    if (game.player.clickValue >= 2) achieve("achPowerful");
+    if (game.player.clickValue >= 2) achieve("achPowerful");
 }
 
 /**
@@ -1414,6 +1436,7 @@ function tax(workerRate, buildingRate, active = true) {
     if (number <= 0) number = 0;
     if (active && number == 0) achieve("achPureGreed");
     number += game.player.taxPassiveGold;
+    number = Math.min(number, game.player.maxTax);
     if (!active) return number;
     gainGold(number);
 }
@@ -1567,7 +1590,7 @@ function getAmountPrestiges() {
 /**
  * Returns the current total amount of achievements atained.
  */
- function getAmountAchievements() {
+function getAmountAchievements() {
     var number = 0;
     for (var ach in game.achievements) {
         if (!game.achievements[ach].achieved) continue;
@@ -1639,6 +1662,7 @@ function getFullResDescription(what) {
  */
 function getResDescription(what, positive = true) {
     var description = "";
+    var whatP = what + "P";
     var resource = getFromText(what);
     if (!resource) return definition;
     //passive bonuses
@@ -1654,7 +1678,7 @@ function getResDescription(what, positive = true) {
                 description += "<span style =\"color:" + (passiveRate > 0 ? "darkgreen" : "darkred") + ";\">"
                     + "<br />" + passive.label + " " + (passiveRate > 0 ? "giving" : "costing") + " " + prettify(Math.abs(passiveRate), 2, true) + " " + game.resources[gainBlock].label + " per second."
                     + "</span>";
-            } else if (gainBlock == (what + "P")) {
+            } else if (gainBlock == (whatP)) {
                 description += "<span style =\"color:" + (passiveRate > 0 ? "darkgreen" : "darkred") + ";\">"
                     + "<br />" + passive.label + " " + (passiveRate > 0 ? "giving" : "costing") + " " + prettify(Math.abs(passiveRate), 2, true) + " " + game.resources[gainBlock].label + " per second. (" + prettify((passiveRate * game.resources[gainBlock].parent[what].gain * game.player.parentValue) / (game.resources[gainBlock].max - game.resources[gainBlock].min), 3, true) + " " + resource.name + " per second.)"
                     + "</span>";
@@ -1670,14 +1694,10 @@ function getResDescription(what, positive = true) {
             if (workerRate == 0) continue;
             else if (positive && workerRate < 0) continue;
             else if (!positive && workerRate > 0) continue;
-            if (gainBlock == what) {
+            if (gainBlock == what || gainBlock == whatP) {
+                var rawResourceConversion = gainBlock == whatP ? " (" + prettify((workerRate * game.resources[gainBlock].parent[what].gain * game.player.parentValue) / (game.resources[gainBlock].max - game.resources[gainBlock].min), 3, true) + " " + resource.name + " per second.)" : "";
                 description += "<span style =\"color:" + (workerRate > 0 ? "darkgreen" : "darkred") + ";\">"
-                    + "<br />" + prettify(worker.current, 0, true) + " " + plural(worker) + " " + (workerRate > 0 ? "giving" : "costing") + " " + prettify(Math.abs(workerRate), 2, true) + " " + game.resources[gainBlock].label + " per second."
-                    + "</span>";
-            } else if (gainBlock == (what + "P")) {
-                description += "<span style =\"color:" + (workerRate > 0 ? "darkgreen" : "darkred") + ";\">"
-                    + "<br />" + prettify(worker.current, 0, true) + " " + plural(worker) + " " + (workerRate > 0 ? "giving" : "costing") + " " + prettify(Math.abs(workerRate), 2, true) + " " + game.resources[gainBlock].label + " per second. (" + prettify((workerRate * game.resources[gainBlock].parent[what].gain * game.player.parentValue) / (game.resources[gainBlock].max - game.resources[gainBlock].min), 3, true) + " " + resource.name + " per second.)"
-                    + "</span>";
+                    + "<br />" + prettify(worker.current, 0, true) + " " + plural(worker) + " " + (workerRate > 0 ? "giving" : "costing") + " " + prettify(Math.abs(workerRate), 2, true) + " " + game.resources[gainBlock].label + " per second." + rawResourceConversion + "</span>";
             }
         }
     }
@@ -1685,15 +1705,15 @@ function getResDescription(what, positive = true) {
     for (var bld in game.buildings) {
         if (!game.buildings[bld].current) continue;
         for (var gainBlock in game.buildings[bld].resourceGain) {
-            if (gainBlock == what || gainBlock == (what + "P")) {
+            if (gainBlock == what || gainBlock == (whatP)) {
                 var building = game.buildings[bld];
                 var buildingRate = building.resourceGain[gainBlock].current;
                 if (buildingRate == 0) continue;
                 else if (positive && buildingRate < 0) continue;
                 else if (!positive && buildingRate > 0) continue;
+                var rawResourceConversion = gainBlock == whatP ? " (" + prettify((buildingRate * game.resources[gainBlock].parent[what].gain * game.player.parentValue) / (game.resources[gainBlock].max - game.resources[gainBlock].min), 3, true) + " " + resource.name + " per second.)" : "";
                 description += "<span style =\"color:" + (buildingRate > 0 ? "darkgreen" : "darkred") + ";\">"
-                    + "<br />" + building.current + " " + plural(building) + " " + (buildingRate > 0 ? "giving" : "costing") + " " + Math.abs(buildingRate) + " " + game.resources[gainBlock].label + " per second."
-                    + "</span>";
+                    + "<br />" + building.current + " " + plural(building) + " " + (buildingRate > 0 ? "giving" : "costing") + " " + Math.abs(buildingRate) + " " + game.resources[gainBlock].label + " per second." + rawResourceConversion + "</span>";
             }
         }
     }
@@ -3260,7 +3280,8 @@ function tooltip(what = "hide", event = null, repositionTooltip = true) {
                 bottomText = "Achievement Points: " + (item.points ? item.points : "0");
             } else {
                 titleText = (item.fullLabel ? item.fullLabel : item.label);
-                mainText = item.description();
+                var progress = item.hasOwnProperty("progress") && !item.achieved ? "<br /><span class =\"tooltipSmaller\">" + item.progress() + "</span>" : "";
+                mainText = item.description() + progress;
                 bottomText = "Achievement Points: " + (item.points ? item.points : "0");
                 if (item.achieved) bottomText += "<span style='color: green;'> (You have this achievement.)</span>";
             }
@@ -3379,6 +3400,6 @@ setTimeout(gameTimeout, (1000 / game.global.speed));
 //unhide body
 document.body.classList.remove("locked");
 //save game every minute
-setTimeout(autoSave, 60000);
+var autosaveTimer = setTimeout(autoSave, 60000);
 //display tips for user
-var tutorialID = setTimeout(randomTip, 300000);
+var tutorialTimer = setTimeout(randomTip, 300000);
