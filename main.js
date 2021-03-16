@@ -347,8 +347,8 @@ function sendMessages() {
             var paras = document.getElementsByClassName('msgSave');
             while (paras[0]) {
                 paras[0].parentNode.removeChild(paras[0]);
-                number--;
             }
+            number--;
         }
         else if (message.type == "warning") elem += "msgWarning";
         else if (message.type == "tutorial") elem += "msgTutorial";
@@ -1313,7 +1313,7 @@ function upgradePlayerClickGain(number) {
     if (!number || number == 0) return;
     game.player.clickValue = prettify(game.player.clickValue + number, 2);
     updateStatistics();
-    if (game.player.clickValue >= 2) achieve("achPowerful");
+    if (game.player.clickValue >= 2) achieve("achPowerful");
 }
 
 /**
@@ -1416,6 +1416,7 @@ function tax(workerRate, buildingRate, active = true) {
     if (number <= 0) number = 0;
     if (active && number == 0) achieve("achPureGreed");
     number += game.player.taxPassiveGold;
+    number = Math.min(number, game.player.maxTax);
     if (!active) return number;
     gainGold(number);
 }
@@ -1569,7 +1570,7 @@ function getAmountPrestiges() {
 /**
  * Returns the current total amount of achievements atained.
  */
- function getAmountAchievements() {
+function getAmountAchievements() {
     var number = 0;
     for (var ach in game.achievements) {
         if (!game.achievements[ach].achieved) continue;
@@ -1641,6 +1642,7 @@ function getFullResDescription(what) {
  */
 function getResDescription(what, positive = true) {
     var description = "";
+    var whatP = what + "P";
     var resource = getFromText(what);
     if (!resource) return definition;
     //passive bonuses
@@ -1656,7 +1658,7 @@ function getResDescription(what, positive = true) {
                 description += "<span style =\"color:" + (passiveRate > 0 ? "darkgreen" : "darkred") + ";\">"
                     + "<br />" + passive.label + " " + (passiveRate > 0 ? "giving" : "costing") + " " + prettify(Math.abs(passiveRate), 2, true) + " " + game.resources[gainBlock].label + " per second."
                     + "</span>";
-            } else if (gainBlock == (what + "P")) {
+            } else if (gainBlock == (whatP)) {
                 description += "<span style =\"color:" + (passiveRate > 0 ? "darkgreen" : "darkred") + ";\">"
                     + "<br />" + passive.label + " " + (passiveRate > 0 ? "giving" : "costing") + " " + prettify(Math.abs(passiveRate), 2, true) + " " + game.resources[gainBlock].label + " per second. (" + prettify((passiveRate * game.resources[gainBlock].parent[what].gain * game.player.parentValue) / (game.resources[gainBlock].max - game.resources[gainBlock].min), 3, true) + " " + resource.name + " per second.)"
                     + "</span>";
@@ -1672,14 +1674,10 @@ function getResDescription(what, positive = true) {
             if (workerRate == 0) continue;
             else if (positive && workerRate < 0) continue;
             else if (!positive && workerRate > 0) continue;
-            if (gainBlock == what) {
+            if (gainBlock == what || gainBlock == whatP) {
+                var rawResourceConversion = gainBlock == whatP ? " (" + prettify((workerRate * game.resources[gainBlock].parent[what].gain * game.player.parentValue) / (game.resources[gainBlock].max - game.resources[gainBlock].min), 3, true) + " " + resource.name + " per second.)" : "";
                 description += "<span style =\"color:" + (workerRate > 0 ? "darkgreen" : "darkred") + ";\">"
-                    + "<br />" + prettify(worker.current, 0, true) + " " + plural(worker) + " " + (workerRate > 0 ? "giving" : "costing") + " " + prettify(Math.abs(workerRate), 2, true) + " " + game.resources[gainBlock].label + " per second."
-                    + "</span>";
-            } else if (gainBlock == (what + "P")) {
-                description += "<span style =\"color:" + (workerRate > 0 ? "darkgreen" : "darkred") + ";\">"
-                    + "<br />" + prettify(worker.current, 0, true) + " " + plural(worker) + " " + (workerRate > 0 ? "giving" : "costing") + " " + prettify(Math.abs(workerRate), 2, true) + " " + game.resources[gainBlock].label + " per second. (" + prettify((workerRate * game.resources[gainBlock].parent[what].gain * game.player.parentValue) / (game.resources[gainBlock].max - game.resources[gainBlock].min), 3, true) + " " + resource.name + " per second.)"
-                    + "</span>";
+                    + "<br />" + prettify(worker.current, 0, true) + " " + plural(worker) + " " + (workerRate > 0 ? "giving" : "costing") + " " + prettify(Math.abs(workerRate), 2, true) + " " + game.resources[gainBlock].label + " per second." + rawResourceConversion + "</span>";
             }
         }
     }
@@ -1687,15 +1685,15 @@ function getResDescription(what, positive = true) {
     for (var bld in game.buildings) {
         if (!game.buildings[bld].current) continue;
         for (var gainBlock in game.buildings[bld].resourceGain) {
-            if (gainBlock == what || gainBlock == (what + "P")) {
+            if (gainBlock == what || gainBlock == (whatP)) {
                 var building = game.buildings[bld];
                 var buildingRate = building.resourceGain[gainBlock].current;
                 if (buildingRate == 0) continue;
                 else if (positive && buildingRate < 0) continue;
                 else if (!positive && buildingRate > 0) continue;
+                var rawResourceConversion = gainBlock == whatP ? " (" + prettify((buildingRate * game.resources[gainBlock].parent[what].gain * game.player.parentValue) / (game.resources[gainBlock].max - game.resources[gainBlock].min), 3, true) + " " + resource.name + " per second.)" : "";
                 description += "<span style =\"color:" + (buildingRate > 0 ? "darkgreen" : "darkred") + ";\">"
-                    + "<br />" + building.current + " " + plural(building) + " " + (buildingRate > 0 ? "giving" : "costing") + " " + Math.abs(buildingRate) + " " + game.resources[gainBlock].label + " per second."
-                    + "</span>";
+                    + "<br />" + building.current + " " + plural(building) + " " + (buildingRate > 0 ? "giving" : "costing") + " " + Math.abs(buildingRate) + " " + game.resources[gainBlock].label + " per second." + rawResourceConversion + "</span>";
             }
         }
     }
@@ -3262,7 +3260,8 @@ function tooltip(what = "hide", event = null, repositionTooltip = true) {
                 bottomText = "Achievement Points: " + (item.points ? item.points : "0");
             } else {
                 titleText = (item.fullLabel ? item.fullLabel : item.label);
-                mainText = item.description();
+                var progress = item.hasOwnProperty("progress") && !item.achieved ? "<br /><span class =\"tooltipSmaller\">" + item.progress() + "</span>" : "";
+                mainText = item.description() + progress;
                 bottomText = "Achievement Points: " + (item.points ? item.points : "0");
                 if (item.achieved) bottomText += "<span style='color: green;'> (You have this achievement.)</span>";
             }

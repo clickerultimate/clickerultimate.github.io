@@ -53,6 +53,7 @@ function newGame() {
             gold: 0,
             nextGoldRate: 0,
             taxPassiveGold: 0,
+            maxTax: 100,
             prestigePoints: 0,
             nextPrestigePoints: 0,
             achievementPoints: 0,
@@ -1027,7 +1028,8 @@ function newGame() {
                 label: "Tax",
                 description: function () {
                     return "Tax your population. Collect <b>" + this.rate + " Gold</b> for each <b>Worker</b> you have. However, doing so will incur an upkeep cost of <b>" + Math.abs(this.maxRate) + " Gold</b> per <b>Building</b>. The collected amount can never go below 0.<br />Currently you have:<br /><b>"
-                        + getAmountWorkers() + " Workers giving " + (getAmountWorkers() * this.rate) + " Gold<br />" + getAmountBuildings() + " Buildings costing " + Math.abs(getAmountBuildings() * this.maxRate) + " Gold<br />" + (game.player.taxPassiveGold > 0 ? "Taxman skill giving " + game.player.taxPassiveGold + " Gold<br />" : "") + "Tax Total: " + tax(this.rate, this.maxRate, false) + " Gold";
+                        + getAmountWorkers() + " Workers giving " + (getAmountWorkers() * this.rate) + " Gold<br />" + getAmountBuildings() + " Buildings costing " + Math.abs(getAmountBuildings() * this.maxRate) + " Gold<br />" + (game.player.taxPassiveGold > 0 ? "Taxman skill giving " + game.player.taxPassiveGold + " Gold<br />" : "")
+                        + "Tax Ceiling: " + game.player.maxTax + " Gold<br />Tax Total: " + tax(this.rate, this.maxRate, false) + " Gold";
                 },
                 rate: 1,
                 maxRate: -10,
@@ -1045,7 +1047,8 @@ function newGame() {
                 label: "Property Tax",
                 description: function () {
                     return "Tax your population via the properties. Collect <b>" + this.rate + " Gold</b> for each <b>Building</b> you have. However, doing so will incur a welfare cost of <b>" + Math.abs(this.maxRate) + " Gold</b> per <b>Worker</b>. The collected amount can never go below 0.<br />Currently you have:<br /><b>"
-                        + getAmountBuildings() + " Buildings giving " + (getAmountBuildings() * this.rate) + " Gold<br />" + getAmountWorkers() + " Workers costing " + Math.abs(getAmountWorkers() * this.maxRate) + " Gold<br />" + (game.player.taxPassiveGold > 0 ? "Taxman skill giving " + game.player.taxPassiveGold + " Gold<br />" : "") + "Tax Total: " + tax(this.maxRate, this.rate, false) + " Gold";
+                        + getAmountBuildings() + " Buildings giving " + (getAmountBuildings() * this.rate) + " Gold<br />" + getAmountWorkers() + " Workers costing " + Math.abs(getAmountWorkers() * this.maxRate) + " Gold<br />" + (game.player.taxPassiveGold > 0 ? "Taxman skill giving " + game.player.taxPassiveGold + " Gold<br />" : "")
+                        + "Tax Ceiling: " + game.player.maxTax + " Gold<br />Tax Total: " + tax(this.maxRate, this.rate, false) + " Gold";
                 },
                 rate: 5,
                 maxRate: -2,
@@ -4786,7 +4789,8 @@ function newGame() {
             achBeginner: {
                 name: "achBeginner",
                 label: "Beginner",
-                description: function () { return "The only way to craft your empire, click by click. Reach <b>100 Clicks</b>.<br />(" + Math.min(game.player.totalClicks, 100) + "/100)"; },
+                description: function () { return "The only way to craft your empire, click by click. Reach <b>100 Clicks</b>."; },
+                progress: function () { return "Clicks: " + prettify(Math.min(game.player.totalClicks, 100), 0, true) + "/100"; },
                 points: 0,
                 hidden: false,
                 achieved: false
@@ -4794,7 +4798,8 @@ function newGame() {
             achApprentice: {
                 name: "achApprentice",
                 label: "Apprentice",
-                description: function () { return "Are you getting somewhere yet? Reach <b>1000 Clicks</b>.<br />(" + Math.min(game.player.totalClicks, 1000) + "/1000)"; },
+                description: function () { return "Are you getting somewhere yet? Reach <b>1000 Clicks</b>."; },
+                progress: function () { return "Clicks: " + prettify(Math.min(game.player.totalClicks, 1000), 0, true) + "/1000"; },
                 points: 0,
                 hidden: false,
                 achieved: false
@@ -4802,7 +4807,8 @@ function newGame() {
             achJourneyman: {
                 name: "achJourneyman",
                 label: "Journeyman",
-                description: function () { return "The real clicker is the friends we make along the way. Reach <b>10 000 Clicks</b>.<br />(" + prettify(Math.min(game.player.totalClicks, 10000), 0, true) + "/10K)"; },
+                description: function () { return "The real clicker is the friends we make along the way. Reach <b>10 000 Clicks</b>."; },
+                progress: function () { return "Clicks: " + prettify(Math.min(game.player.totalClicks, 10000), 0, true) + "/10K"; },
                 points: 1,
                 hidden: false,
                 achieved: false
@@ -4810,7 +4816,8 @@ function newGame() {
             achExpert: {
                 name: "achExpert",
                 label: "Expert",
-                description: function () { return "No amount of prestige points can cure your carpal tunnel syndrome. Reach <b>100 000 Clicks</b>.<br />(" + prettify(Math.min(game.player.totalClicks, 100000), 0, true) + "/100K)"; },
+                description: function () { return "No amount of prestige points can cure your carpal tunnel syndrome. Reach <b>100 000 Clicks</b>."; },
+                progress: function () { return "Clicks: " + prettify(Math.min(game.player.totalClicks, 100000), 0, true) + "/100K"; },
                 points: 2,
                 hidden: false,
                 achieved: false
@@ -4852,6 +4859,7 @@ function newGame() {
                 label: "Smithy",
                 fullLabel: "Back to the Smithy with you",
                 description: function () { return "Hire a total of <b>25 Ironsmiths</b>. Wait a minute, are you even paying these people?"; },
+                progress: function () { return "Ironsmiths: " + Math.min(game.workers.ironsmith.current, 25) + "/25"; },
                 points: 1,
                 hidden: false,
                 achieved: false
@@ -4911,6 +4919,7 @@ function newGame() {
                 name: "achPolymath",
                 label: "Polymath",
                 description: function () { return "Perform a total of <b>100 Trades</b> and purchase a total of <b>100 Upgrades</b> in a single colony. Embody the art of micromanagement."; },
+                progress: function () { return "Trades: " + Math.min(getAmountTrades(), 100) + "/100<br />Upgrades: " + Math.min(getAmountUpgrades(), 100) + "/100"; },
                 points: 1,
                 hidden: false,
                 achieved: false
@@ -4927,6 +4936,7 @@ function newGame() {
                 name: "achForeman",
                 label: "Foreman",
                 description: function () { return "Build an impressive total of <b>15 Stone Quarries</b>."; },
+                progress: function () { return "Stone Quarries: " + Math.min(game.buildings.stoneQuarry.current, 15) + "/15"; },
                 points: 1,
                 hidden: false,
                 achieved: false
@@ -4935,6 +4945,7 @@ function newGame() {
                 name: "achWillOfThePeople",
                 label: "Will of the People",
                 description: function () { return "Build <b>20 Water Mills</b> and <b>20 Grain Mills</b> without having to resort to using any of the <b>Trades</b>."; },
+                progress: function () { return getAmountTrades() > 0 ? "One or more Trades were made this colony." : "Water Mills: " + Math.min(game.buildings.waterMill.current, 20) + "/20<br />Grain Mills: " + Math.min(game.buildings.grainMill.current, 20) + "/20"; },
                 points: 1,
                 hidden: false,
                 achieved: false
