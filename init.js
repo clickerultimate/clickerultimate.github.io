@@ -1,8 +1,8 @@
 function newGame() {
     var initData = {
         global: {
-            version: "0.2.04",
-            latestChanges: "New achievements, UI tweaks, optimization and a few bug fixes.",
+            version: "0.2.05",
+            latestChanges: "Introducing a new Tax Ceiling (will be upgradeable in the future). Also a lot of bug fixes.",
             start: new Date().getTime(),
             time: 0,
             speed: 10,
@@ -11,6 +11,7 @@ function newGame() {
             availableThemes: ["defaultTheme", "nightTheme", "crimsonTheme", "turtleTheme", "strikingTheme", "indigoTheme", "arcticTheme", "victoryTheme"],
             themeNames: ["Default", "Quiet Night", "Crimson Sky", "Turtle", "Lightning Strike", "Indigo Rush", "Arctic Metal", "Victory"],
             messages: [],
+            achievements: [],
             unreadMessages: 0,
             lastTip: "",
             autoClicking: false,
@@ -1173,7 +1174,7 @@ function newGame() {
                         current: 30
                     }
                 },
-                effect: function () { upgradePlayerClickGain(this.rate); },
+                effect: function () { upgradePlayerClickGain(this.rate); achieve("achSparta"); },
                 personality: "stern",
                 favored: ["advFire", "advSword", "advSpear", "advGunpowder"],
                 unfavored: ["advFervor", "advPrintingPress", "advMercantilism"],
@@ -4950,6 +4951,14 @@ function newGame() {
                 hidden: false,
                 achieved: false
             },
+            achSleeper: {
+                name: "achSleeper",
+                label: "The Sleeper",
+                description: function () { return "My power of thought calls you, sleeper. Acquire your first <b>Passive Bonus</b>."; },
+                points: 0,
+                hidden: false,
+                achieved: false
+            },
             achInformed: {
                 name: "achInformed",
                 label: "Informed",
@@ -4970,6 +4979,15 @@ function newGame() {
                 name: "achRepublic",
                 label: "Republic",
                 description: function () { return "You have acquired <b>Plato</b> as one of your counselors. Go forth and build a prosperous city."; },
+                points: 1,
+                hidden: true,
+                achieved: false
+            },
+            achSparta: {
+                name: "achSparta",
+                label: "Sparta",
+                fullLabel: "This is Sparta",
+                description: function () { return "You have acquired <b>Leonidas</b> as one of your counselors. That should give your workers a kick in their productivity."; },
                 points: 1,
                 hidden: true,
                 achieved: false

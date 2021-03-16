@@ -93,6 +93,7 @@ function gameLoop(exhaustTick) {
 
     if (!exhaustTick) {
         sendMessages();
+        sendAchievements();
     }
 }
 
@@ -160,8 +161,8 @@ function toggleTutorial() {
     if (game.settings.tutorialEnabled) game.settings.tutorialEnabled = false;
     else game.settings.tutorialEnabled = true;
     updateTutorialSetting();
-    clearTimeout(tutorialID);
-    if (game.settings.tutorialCompleted && game.settings.tutorialEnabled) tutorialID = setTimeout(randomTip, 300000);
+    clearTimeout(tutorialTimer);
+    if (game.settings.tutorialCompleted && game.settings.tutorialEnabled) tutorialTimer = setTimeout(randomTip, 300000);
 }
 
 /**
@@ -508,7 +509,7 @@ function tutorialMessage(type) {
 function finishTutorial() {
     if (game.settings.tutorialCompleted) return;
     game.settings.tutorialCompleted = true;
-    tutorialID = setTimeout(randomTip, 300000);
+    tutorialTimer = setTimeout(randomTip, 300000);
 }
 
 /**
@@ -1085,6 +1086,7 @@ function buyPassive(passive) {
         recalculateResRate(resource);
         updateResRateValues(resource, true);
     }
+    achieve("achSleeper");
 }
 
 /**
@@ -1095,28 +1097,46 @@ function buyPassive(passive) {
 function achieve(ach) {
     var achievement = getFromText(ach);
     if (!achievement || !achievement.label || achievement.achieved) return;
-    document.getElementById("achLabel").innerHTML = (achievement.fullLabel ? achievement.fullLabel : achievement.label);
-    document.getElementById("achPoints").innerHTML = achievement.points ? achievement.points : 0;
+    game.global.achievements.push(achievement);
     achievement.achieved = true;
     game.player.achievementPoints += achievement.points;
+    if (achievement.hidden) updateContainer("achievements");
+    updateAchievementValues(true);
+}
+
+/**
+ * Sends the achievements out to the screen.
+ */
+var achievementTimer = 0;
+function sendAchievements() {
+    if (achievementTimer != 0 || game.global.achievements.length <= 0) return;
+    var achievement = game.global.achievements.shift();
+
+    document.getElementById("achLabel").innerHTML = (achievement.fullLabel ? achievement.fullLabel : achievement.label);
+    document.getElementById("achPoints").innerHTML = achievement.points ? achievement.points : 0;
 
     var achievementPill = document.getElementById("achievementPill");
     achievementPill.style.transition = "visibility 0s linear 0s, opacity 1s";
     achievementPill.style.visibility = "visible";
     achievementPill.style.opacity = 1;
-    setTimeout(hideAchievement, 4000);
-    if (achievement.hidden) updateContainer("achievements");
-    updateAchievementValues(true);
+    achievementTimer = setTimeout(hideAchievement, 4000);
 }
 
 /**
  * Hides the achievement popup.
  */
 function hideAchievement() {
+    clearTimeout(achievementTimer);
+    achievementTimer = 0;
+    if (game.global.achievements.length > 0) {
+        sendingAchievements = false;
+        return;
+    }
     var achievementPill = document.getElementById("achievementPill");
     achievementPill.style.transition = "visibility 0s linear 1s, opacity 1s";
     achievementPill.style.opacity = 0;
     achievementPill.style.visibility = "hidden";
+    sendingAchievements = false;
 }
 
 /**
@@ -3382,4 +3402,4 @@ document.body.classList.remove("locked");
 //save game every minute
 var autosaveTimer = setTimeout(autoSave, 60000);
 //display tips for user
-var tutorialID = setTimeout(randomTip, 300000);
+var tutorialTimer = setTimeout(randomTip, 300000);
