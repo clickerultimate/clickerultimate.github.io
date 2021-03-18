@@ -975,6 +975,11 @@ function buyBuilding(building, number, forFree = false) {
  */
 function buyUpgrade(upgrade) {
     if (!upgrade || !canAfford(upgrade)) return;
+    var isBought = false;
+    if (typeof upgrade.level === "undefined" || upgrade.level >= upgrade.maxLevel) {
+        isBought = true;
+        upgrade.bought = true;
+    }
     upgrade.effect();
 
     for (var res in upgrade.resourceCost) {
@@ -985,8 +990,7 @@ function buyUpgrade(upgrade) {
     }
     if (typeof upgrade.goldCost !== "undefined") gainGold(-upgrade.goldCost);
 
-    if (typeof upgrade.level === "undefined" || upgrade.level >= upgrade.maxLevel) {
-        upgrade.bought = true;
+    if (isBought) {
         tooltip();
     } else {
         upgrade.level++;
@@ -1478,6 +1482,7 @@ function canAfford(what) {
     if (game.player.advancementPoints < what.advCost) return false;
     if (game.player.gold < what.goldCost) return false;
     if (game.player.prestigePoints < what.ptgCost) return false;
+    if (game.player.colonies < what.colonies) return false;
     return true;
 }
 
@@ -1818,6 +1823,7 @@ function unlock(...what) {
         if (itemType == "resources" && item.name.indexOf("Progress") === -1) {
             itemP = getFromText(what[i] + "P");
         } else if (itemType == "leaders" && !game.upgrades.upgLeaders.bought) continue;
+        else if (itemType == "upgrades" && item.hasOwnProperty("canUnlock") && !item.canUnlock()) continue;
         item.locked = false;
         if (itemP) itemP.locked = false;
         if (!containers.includes(itemType)) containers.push(itemType);
@@ -2740,6 +2746,7 @@ function updateGraphics() {
  */
 function updateAvailableUpgrades(active = false) {
     //available upgrades based on passive actions
+    if (!active && !game.upgrades.upgJewelers.locked) return;
     if (game.upgrades.upgBucket.locked && game.resources.wood.current >= 1) { unlock("upgBucket"); tutorialMessage("levels"); }
     else if (game.upgrades.upgBarrels.locked && game.resources.water.current == game.resources.water.max && game.resources.wood.current >= 1) unlock("upgBarrels");
     else if (game.upgrades.upgShed.locked && game.resources.wood.current == game.resources.wood.max) unlock("upgShed");
@@ -2764,8 +2771,6 @@ function updateAvailableUpgrades(active = false) {
     else if (game.upgrades.upgMasonry4.locked && game.upgrades.upgMasonry3.bought && game.upgrades.upgDiamondTrade.bought) unlock("upgMasonry4");
     if (game.upgrades.upgStonework2.locked && game.upgrades.upgStonework.bought && game.upgrades.upgDarkAge.bought) unlock("upgStonework2");
     if (game.upgrades.upgFeudalAge.locked && game.upgrades.upgMasonry.bought && game.upgrades.upgWoodenStorage.bought) unlock("upgFeudalAge");
-    else if (game.upgrades.upgRenaissance.locked && game.upgrades.upgIronBasket.bought) unlock("upgRenaissance");
-    else if (game.upgrades.upgRevolutionAge.locked && game.player.colonies >= 1 && game.upgrades.upgDiamondStorage2.bought && game.upgrades.upgSilverwork.bought) unlock("upgRevolutionAge");
     if (game.upgrades.upgScarcity3.locked && game.upgrades.upgScarcity2.bought && game.upgrades.upgEconomics.bought) unlock("upgScarcity3");
     if (game.upgrades.upgNourishment2.locked && game.player.colonies >= 3 && game.upgrades.upgNourishment.bought && game.upgrades.upgIrrigation.bought) unlock("upgNourishment2");
     if (game.advancements.advMonasticism.locked && game.player.colonies >= 5 && game.upgrades.upgFeudalAge.bought) unlock("advMonasticism");
@@ -3246,6 +3251,7 @@ function tooltip(what = "hide", event = null, repositionTooltip = true) {
         } else if (itemType == "upgrades") {
             titleText = (item.fullLabel ? item.fullLabel : item.label) + (item.level > 0 ? " (" + item.level + "/" + item.maxLevel + ")" : "");
             mainText = item.description();
+            if (item.colonies > 0 && item.colonies > game.player.colonies) mainText += "<br /><span style='color: red;'>You need to have built at least <b>" + item.colonies + (item.colonies > 1 ? " Colonies" : " Colony") + "</b> to purchase this upgrade.</span>"
             var tempBottomText = getCostLabel(item);
             if (tempBottomText.length < 1) bottomText = "<span style='color: green;'>This upgrade is free!</span>";
             else bottomText = tempBottomText;

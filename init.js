@@ -1531,7 +1531,7 @@ function newGame() {
                         rate: 1.10
                     }
                 },
-                effect: function () { upgradeMaxValue("water", this.rate); unlock("upgStoneAge"); },
+                effect: function () { upgradeMaxValue("water", this.rate); unlock("upgStoneAge", "upgWaterTap"); },
                 locked: true,
                 bought: false
             },
@@ -1545,7 +1545,7 @@ function newGame() {
                         base: 20
                     }
                 },
-                effect: function () { upgradeClickGain("waterP", this.current); unlock("upgWoodTap"); },
+                effect: function () { upgradeClickGain("waterP", this.current); unlock("upgWoodTap", "upgWaterTap2"); },
                 locked: true,
                 bought: false
             },
@@ -1560,6 +1560,7 @@ function newGame() {
                     }
                 },
                 effect: function () { upgradeClickGain("waterP", this.current); },
+                canUnlock: function () { return game.upgrades.upgFeudalAge.bought && game.upgrades.upgWaterTap.bought; },
                 locked: true,
                 bought: false
             },
@@ -2726,7 +2727,10 @@ function newGame() {
                         rate: 1.15
                     }
                 },
-                effect: function () { upgradeMaxValue("wheat", (this.level == this.maxLevel ? 250 : this.rate)); },
+                effect: function () {
+                    upgradeMaxValue("wheat", (this.level == this.maxLevel ? 250 : this.rate));
+                    if (this.level == this.maxLevel) unlock("upgRenaissance");
+                },
                 locked: true,
                 bought: false
             },
@@ -3394,7 +3398,13 @@ function newGame() {
                         rate: 1.25
                     }
                 },
-                effect: function () { upgradeWorkerRate("silversmith", this.rate); if (this.level == this.maxLevel) upgradeWorkerRate("jewelry", this.maxRate); },
+                effect: function () {
+                    upgradeWorkerRate("silversmith", this.rate);
+                    if (this.level == this.maxLevel) {
+                        upgradeWorkerRate("jewelry", this.maxRate);
+                        if (game.upgrades.upgDiamondStorage2.level > 1) unlock("upgRevolutionAge");
+                    }
+                },
                 locked: true,
                 bought: false
             },
@@ -3462,7 +3472,7 @@ function newGame() {
                 name: "upgDiamondStorage2",
                 label: "Diamond Stor. II",
                 fullLabel: "Diamond Storage II",
-                description: function () { return "Extend the peak of storage technology to other resources. Upgrades the maximum capacity of <b>Water</b> by <b>+" + prettify(this.waterMax, 0, true) + "</b>, <b>Wood</b> by <b>+" + prettify(this.woodMax, 0, true) + " and <b>Wheat</b> by <b>+" + prettify(this.wheatMax, 0, true) + "</b>."; },
+                description: function () { return "Extend the peak of storage technology to other resources. Upgrades the maximum capacity of <b>Water</b> by <b>+" + prettify(this.waterMax, 0, true) + "</b>, <b>Wood</b> by <b>+" + prettify(this.woodMax, 0, true) + "</b> and <b>Wheat</b> by <b>+" + prettify(this.wheatMax, 0, true) + "</b>."; },
                 waterMax: 50000,
                 woodMax: 10000,
                 wheatMax: 25000,
@@ -3482,6 +3492,7 @@ function newGame() {
                     upgradeMaxValue("water", this.waterMax);
                     upgradeMaxValue("wood", this.woodMax);
                     upgradeMaxValue("wheat", this.wheatMax);
+                    if (game.upgrades.upgSilverwork.bought) unlock("upgRevolutionAge");
                 },
                 locked: true,
                 bought: false
@@ -3568,7 +3579,7 @@ function newGame() {
                 },
                 effect: function () {
                     advanceAge(this, 1);
-                    unlock("iron", "sawmill", "stoneQuarry", "foundry", "upgStoneTap", "upgCasingWater", "upgCasingWood", "upgCasingStone", "upgCasingIron", "upgDeepDigging", "upgMonarchy", "upgVassalism");
+                    unlock("iron", "sawmill", "stoneQuarry", "foundry", "upgStoneTap", "upgCasingWater", "upgCasingWood", "upgCasingStone", "upgCasingIron", "upgDeepDigging", "upgMonarchy", "upgVassalism", "upgWaterTap2");
                     upgradeWorkerRate("waterFetcher", this.waterRate);
                     upgradeWorkerRate("lumberjack", this.woodRate);
                     upgradeWorkerRate("miner", this.stoneRate);
@@ -3686,9 +3697,10 @@ function newGame() {
                 label: "Age of Revolution",
                 description: function () {
                     return "Enter the <b>" + this.label + "</b>! Unrest grows in your population and the people yearn for change. This will come at a cost, but perhaps you can make the endeavour worthwile with some patience. The <b>Age of Revolution</b> will lead to these changes:<b><br />" +
-                        "1 Advancement Point<br />Pumping System passive bonus (+10 Water/sec)<br />10% Worker Cost Increase<br />15% Building Cost Increase<br />Increased Silver Cost of Taxes<br />+" + prettify(this.diamondMax, 0, true) + "  Maximum Diamond Progress";
+                        "1 Advancement Point<br />Pumping System passive bonus (+10 Water/sec)<br />10% Worker Cost Increase<br />15% Building Cost Increase<br />Increased Silver Cost of Taxes<br />+" + prettify(this.diamondMax, 0, true) + "  Maximum Diamond Progress</b>";
                 },
                 type: "age",
+                colonies: 1,
                 diamondMax: 10000,
                 taxIncrease: 900,
                 workerIncrease: 0.1,
@@ -3716,13 +3728,13 @@ function newGame() {
                 effect: function () {
                     advanceAge(this, 1);
                     unlock("trdAdvancementPoint2");
+                    achieve("achRebel");
                     buyPassive(getFromText("psvPumpingSystem"));
                     upgradeWorkerCost(this.workerIncrease);
                     upgradeBuildingCost(this.buildingIncrease);
                     upgradeMaxValue("diamondP", this.diamondMax);
                     upgradeTradeCost("trdTax", this.taxIncrease, "silver");
                     upgradeTradeCost("trdPropertyTax", this.taxIncrease, "silver");
-                    achieve("achRebel");
                 },
                 locked: true,
                 bought: false
@@ -4851,6 +4863,7 @@ function newGame() {
                 name: "achCraven",
                 label: "Craven",
                 description: function () { return "Hire your first <b>Miner</b> without having a single <b>Water Fetcher</b> or <b>Lumberjack</b> under your employ. Why would you do this?"; },
+                progress: function () { return game.workers.waterFetcher.current > 0 || game.workers.lumberjack.current > 0 ? "You hired a water fetcher and/or a lumberjack." : "Miners: " + Math.min(game.workers.miner.current, 1) + "/1"; },
                 points: 1,
                 hidden: false,
                 achieved: false
@@ -4987,7 +5000,7 @@ function newGame() {
                 name: "achSparta",
                 label: "Sparta",
                 fullLabel: "This is Sparta",
-                description: function () { return "You have acquired <b>Leonidas</b> as one of your counselors. That should give your workers a kick in their productivity."; },
+                description: function () { return "You have acquired <b>Leonidas</b> as one of your counselors. That should kick your base click power up a notch."; },
                 points: 1,
                 hidden: true,
                 achieved: false
