@@ -531,7 +531,10 @@ function newGame() {
                     }
                 },
                 effect: function () {
-                    if (this.current == 25) upgradeBuildingCost(-0.02);
+                    if (this.current == 25) { 
+                        upgradeBuildingCost(-0.02);
+                        achieve("achMonk");
+                    }
                     else if (this.current == 50) {
                         upgradeWorkerCostRate("church", "water", -0.01);
                         upgradeWorkerCostRate("church", "wood", -0.01);
@@ -1125,6 +1128,7 @@ function newGame() {
                     }
                 },
                 effect: function () { upgradeBuildingCost(this.rate); buyPassive(getFromText("psvNebuchadnezzar")); },
+                canUnlock: function () { return game.player.colonies >= 3 },
                 personality: "wise",
                 favored: ["advEngineering", "advFervor", "advValor"],
                 unfavored: ["advPiety", "advIronWill", "advBrotherhood"],
@@ -1152,6 +1156,7 @@ function newGame() {
                         var adv = game.advancements.advMathematics;
                         buyAdvancement(adv, true);
                     }
+                    achieve("achMathematician");
                 },
                 personality: "wise",
                 favored: ["advMathematics", "advLogos", "advIndependence"],
@@ -1238,6 +1243,7 @@ function newGame() {
                     buyAdvancement(adv2, true);
                     achieve("achGreatOne");
                 },
+                canUnlock: function () { return game.advancements.advTemperance.bought && game.advancements.advFire.bought && game.advancements.advWheel.bought },
                 personality: "stern",
                 favored: ["advWheel", "advFervor", "advSilverMastery"],
                 unfavored: ["advMathematics", "advTemperance", "advPiety"],
@@ -1260,6 +1266,7 @@ function newGame() {
                     }
                 },
                 effect: function () { upgradeWorkerCost(this.rate); upgradeUpgradeCost(this.rate); },
+                canUnlock: function() { return game.player.colonies >= 5; },
                 favored: ["advTemperance", "advPiety", "advBrotherhood"],
                 unfavored: ["advPrintingPress", "advNavigation", "advDominion"],
                 locked: true,
@@ -1276,7 +1283,7 @@ function newGame() {
                         current: 50
                     }
                 },
-                effect: function () { },
+                effect: function () { unlock("upgEducation", "upgTheology2", "ldrGutenberg"); },
                 favored: ["advTheology", "advEngineering", "advEcumenism"],
                 unfavored: ["advPrintingPress", "advNavigation", "advDominion"],
                 locked: true,
@@ -1293,10 +1300,11 @@ function newGame() {
                 effect: function () {
                     var adv1 = game.advancements.advTemperance;
                     var adv2 = game.advancements.advLiteracy;
-                    unlock(adv1.name, adv2.name);
+                    unlock("advancements", adv1.name, adv2.name);
                     buyAdvancement(adv1, true);
                     buyAdvancement(adv2, true);
                 },
+                canUnlock: function () { return game.player.colonies >= 3; },
                 personality: "stern",
                 favored: ["advWheel", "advMathematics", "advValor"],
                 unfavored: ["advPrintingPress", "advLogos", "advFire"],
@@ -1317,7 +1325,8 @@ function newGame() {
                         current: 100
                     }
                 },
-                effect: function () { if (game.advancements.advPrintingPress.bought) unlock("advEvangelism", "advArchitecture"); },
+                effect: function () { unlock("advEvangelism", "advArchitecture"); },
+                canUnlock: function () { return game.leaders.ldrCharlemagne.bought && game.upgrades.upgRenaissance.bought; },
                 personality: "pious",
                 favored: ["advEvangelism", "advTheology", "advPrintingPress"],
                 unfavored: ["advLogos", "advMercantilism", "advBrotherhood"],
@@ -1450,7 +1459,10 @@ function newGame() {
                 description: function () { return "You see a river from which you can carry water with your hands. It seems like it will take some work."; },
                 type: "free",
                 resourceCost: {},
-                effect: function () { unlock("water", "resources", "upgWaterFetching", "upgWoodcutting", "settings"); tutorialMessage("gather"); },
+                effect: function () {
+                    unlock("water", "resources", "upgWaterFetching", "upgWoodcutting", "settings", "upgLeaders", "ldrNebuchadnezzar");
+                    tutorialMessage("gather");
+                },
                 locked: false,
                 bought: false
             },
@@ -1460,7 +1472,8 @@ function newGame() {
                 description: function () { return "You've learned from experience that colonies don't just run themselves. Set out to find the most talented members of your civilization. Allows you to recruit a <b>Leader</b> for every colony you build."; },
                 type: "free",
                 resourceCost: {},
-                effect: function () { tutorialMessage("leaders"); },
+                effect: function () { unlock("ldrGilgamesh", "ldrPythagoras"); tutorialMessage("leaders"); },
+                canUnlock: function () { return game.player.colonies >= 2 },
                 locked: true,
                 bought: false
             },
@@ -1473,7 +1486,10 @@ function newGame() {
                         base: 1
                     }
                 },
-                effect: function () { unlock("waterFetcher"); tutorialMessage("workers"); },
+                effect: function () {
+                    unlock("waterFetcher");
+                    tutorialMessage("workers");
+                },
                 locked: true,
                 bought: false
             },
@@ -1559,7 +1575,7 @@ function newGame() {
                         base: 500
                     }
                 },
-                effect: function () { upgradeClickGain("waterP", this.current); },
+                effect: function () { upgradeClickGain("waterP", this.current); unlock("upgWaterTap3"); },
                 canUnlock: function () { return game.upgrades.upgFeudalAge.bought && game.upgrades.upgWaterTap.bought; },
                 locked: true,
                 bought: false
@@ -1575,6 +1591,7 @@ function newGame() {
                     }
                 },
                 effect: function () { upgradeClickGain("waterP", this.current); },
+                canUnlock: function () { return game.upgrades.upgWaterTap2.bought && game.upgrades.upgDarkAge.bought; },
                 locked: true,
                 bought: false
             },
@@ -1588,7 +1605,7 @@ function newGame() {
                         base: 10
                     }
                 },
-                effect: function () { upgradeClickGain("woodP", this.current); },
+                effect: function () { upgradeClickGain("woodP", this.current); unlock("upgWoodTap2"); },
                 locked: true,
                 bought: false
             },
@@ -1603,6 +1620,7 @@ function newGame() {
                     }
                 },
                 effect: function () { upgradeClickGain("woodP", this.current); },
+                canUnlock: function () { return game.upgrades.upgWoodTap.bought && game.upgrades.upgFeudalAge.bought; },
                 locked: true,
                 bought: false
             },
@@ -1616,7 +1634,8 @@ function newGame() {
                         base: 1000
                     }
                 },
-                effect: function () { upgradeClickGain("woodP", this.current); },
+                effect: function () { upgradeClickGain("woodP", this.current); unlock("upgWoodTap3"); },
+                canUnlock: function () { return game.upgrades.upgWoodTap2.bought && game.upgrades.upgSlopeMining.bought; },
                 locked: true,
                 bought: false
             },
@@ -1644,7 +1663,7 @@ function newGame() {
                         base: 80
                     }
                 },
-                effect: function () { upgradeClickGain("stoneP", this.current); },
+                effect: function () { upgradeClickGain("stoneP", this.current); unlock("upgStoneTap3"); },
                 locked: true,
                 bought: false
             },
@@ -1659,6 +1678,7 @@ function newGame() {
                     }
                 },
                 effect: function () { upgradeClickGain("stoneP", this.current); },
+                canUnlock: function () { return game.upgrades.upgStoneTap2.bought && game.upgrades.upgSlopeMining.bought; },
                 locked: true,
                 bought: false
             },
@@ -1862,7 +1882,7 @@ function newGame() {
                 description: function () { return "Researching this will allow you to make buildings. It seems like something worth looking into..."; },
                 resourceCost: {},
                 effect: function () {
-                    unlock("waterMill");
+                    unlock("waterMill", "upgMasonry2", "upgFeudalAge");
                     tutorialMessage("buildings");
                     if (game.player.colonies >= 8) unlock("upgWaterMill");
                     achieve("achMasonry");
@@ -1883,7 +1903,8 @@ function newGame() {
                         base: 100
                     }
                 },
-                effect: function () { upgradeBuildingCost(this.rate); },
+                effect: function () { upgradeBuildingCost(this.rate); unlock("upgMasonry3"); },
+                canUnlock: function () { return game.upgrades.upgMasonry.bought && game.upgrades.upgVassalism.bought; },
                 locked: true,
                 bought: false
             },
@@ -1900,7 +1921,8 @@ function newGame() {
                         base: 125
                     }
                 },
-                effect: function () { upgradeBuildingCost(this.rate); },
+                effect: function () { upgradeBuildingCost(this.rate); unlock("upgMasonry4"); },
+                canUnlock: function () { return game.upgrades.upgMasonry2.bought && game.upgrades.upgDarkAge.bought; },
                 locked: true,
                 bought: false
             },
@@ -1921,6 +1943,7 @@ function newGame() {
                     }
                 },
                 effect: function () { upgradeBuildingCost(this.rate); },
+                canUnlock: function () { return game.upgrades.upgMasonry3.bought && game.upgrades.upgDiamondTrade.bought; },
                 locked: true,
                 bought: false
             },
@@ -1993,7 +2016,7 @@ function newGame() {
                         base: 10
                     }
                 },
-                effect: function () { upgradeMaxValue("wood", this.woodMax); upgradeMaxValue("stone", this.stoneMax); unlock("upgWoodenBasin"); },
+                effect: function () { upgradeMaxValue("wood", this.woodMax); upgradeMaxValue("stone", this.stoneMax); unlock("upgWoodenBasin"); unlock("upgFeudalAge"); },
                 locked: true,
                 bought: false
             },
@@ -2227,7 +2250,7 @@ function newGame() {
                         rate: 2
                     }
                 },
-                effect: function () { upgradeWorkerRate("miner", this.rate); upgradeWorkerRate("stoneQuarry", this.rate); },
+                effect: function () { upgradeWorkerRate("miner", this.rate); upgradeWorkerRate("stoneQuarry", this.rate); unlock("upgStonework2"); },
                 locked: true,
                 bought: false
             },
@@ -2249,6 +2272,7 @@ function newGame() {
                     }
                 },
                 effect: function () { upgradeWorkerRate("miner", this.rate); upgradeWorkerRate("stoneQuarry", this.rate); },
+                canUnlock: function () { return game.upgrades.upgStonework.bought && game.upgrades.upgDarkAge.bought; },
                 locked: true,
                 bought: false
             },
@@ -2272,9 +2296,8 @@ function newGame() {
                     }
                 },
                 effect: function () {
-                    unlock("upgAgriculture", "ironsmith", "upgFoundations", "ldrCharlemagne");
+                    unlock("upgAgriculture", "ironsmith", "upgFoundations", "upgTenacity", "ldrCharlemagne");
                     upgradeWorkerRate("miner", this.rate);
-                    if (game.player.colonies >= 3) unlock("upgTenacity");
                 },
                 locked: true,
                 bought: false
@@ -2292,7 +2315,7 @@ function newGame() {
                         base: 50
                     }
                 },
-                effect: function () { upgradeWorkerCost(this.rate); },
+                effect: function () { upgradeWorkerCost(this.rate); unlock("upgMasonry2"); },
                 locked: true,
                 bought: false
             },
@@ -2314,6 +2337,7 @@ function newGame() {
                     }
                 },
                 effect: function () { upgradeWorkerRate("church", this.rate); downgradeWorkerRate("farmer", this.maxRate); },
+                canUnlock: function () { return game.leaders.ldrCharlemagne.bought && game.advancements.advTheology.bought; },
                 locked: true,
                 bought: false
             },
@@ -2336,6 +2360,7 @@ function newGame() {
                 maxRate: 0.1,
                 resourceCost: {},
                 effect: function () { upgradeWorkerRate("miner", this.rate, "stoneP"); upgradeWorkerRate("sawmill", this.maxRate); },
+                canUnlock: function () { return game.player.colonies >= 3; },
                 locked: true,
                 bought: false
             },
@@ -2380,7 +2405,7 @@ function newGame() {
                         base: 50
                     }
                 },
-                effect: function () { upgradeWorkerRate("farmer", this.rate); },
+                effect: function () { upgradeWorkerRate("farmer", this.rate); unlock("upgNourishment2"); },
                 locked: true,
                 bought: false
             },
@@ -2401,6 +2426,7 @@ function newGame() {
                     }
                 },
                 effect: function () { upgradeWorkerRate("farmer", this.rate); },
+                canUnlock: function() { return game.player.colonies >= 3 && game.upgrades.upgNourishment.bought && game.upgrades.upgIrrigation.bought; },
                 locked: true,
                 bought: false
             },
@@ -2422,7 +2448,7 @@ function newGame() {
                         base: 75
                     }
                 },
-                effect: function () { upgradeMaxValue("wheat", this.wheatMax); downgradeWorkerRate("farmer", this.waterMax); upgradeWorkerRate("farmer", this.rate); },
+                effect: function () { upgradeMaxValue("wheat", this.wheatMax); downgradeWorkerRate("farmer", this.waterMax); upgradeWorkerRate("farmer", this.rate); unlock("upgNourishment2"); },
                 locked: true,
                 bought: false
             },
@@ -2448,6 +2474,7 @@ function newGame() {
                     }
                 },
                 effect: function () { upgradeWorkerRate("farmer", this.rate); },
+                canUnlock: function () { return game.leaders.ldrCharlemagne.bought &&  game.upgrades.upgAgriculture.bought; },
                 locked: true,
                 bought: false
             },
@@ -2496,8 +2523,7 @@ function newGame() {
                 },
                 effect: function () {
                     upgradeWorkerCostRate("waterFetcher", "water", this.rate);
-                    unlock("upgScarcity2");
-                    if (game.player.colonies >= 3) unlock("ldrDante");
+                    unlock("upgScarcity2", "ldrDante");
                 },
                 locked: true,
                 bought: false
@@ -2515,7 +2541,7 @@ function newGame() {
                         base: 60
                     }
                 },
-                effect: function () { upgradeWorkerCostRate("waterMill", "stone", this.rate); },
+                effect: function () { upgradeWorkerCostRate("waterMill", "stone", this.rate); unlock("upgScarcity3"); },
                 locked: true,
                 bought: false
             },
@@ -2533,6 +2559,7 @@ function newGame() {
                     }
                 },
                 effect: function () { upgradeWorkerCostRate("lumberjack", "water", this.rate); },
+                canUnlock: function () { return game.upgrades.upgScarcity2.bought && game.upgrades.upgEconomics.bought; },
                 locked: true,
                 bought: false
             },
@@ -2586,7 +2613,11 @@ function newGame() {
                         rate: 1.35
                     }
                 },
-                effect: function () { unlock("silver", "upgSilversmith", "upgSilverBucket", "upgSilverAxe", "upgSilverPickaxe", "upgSilverSickle"); upgradeMaxValue("stoneP", this.rate); if (this.level == this.maxLevel) unlock("upgIronTap"); },
+                effect: function () { 
+                    unlock("silver", "upgSilversmith", "upgSilverBucket", "upgSilverAxe", "upgSilverPickaxe", "upgSilverSickle", "upgWoodTap3", "upgStoneTap3");
+                    upgradeMaxValue("stoneP", this.rate);
+                    if (this.level == this.maxLevel) unlock("upgIronTap");
+                },
                 locked: true,
                 bought: false
             },
@@ -2868,7 +2899,7 @@ function newGame() {
                         base: 15
                     }
                 },
-                effect: function () { unlock("trdGold", "trdTax", "trdPropertyTax", "trdAdvancementPoint", "upgGloves", "upgBoots", "upgWaterStock", "upgWoodStock", "upgStoneStock", "upgIronStock", "upgWheatStock"); tutorialMessage("tax"); achieve("achTrader"); },
+                effect: function () { unlock("trdGold", "trdTax", "trdPropertyTax", "trdAdvancementPoint", "upgGloves", "upgBoots", "upgWaterStock", "upgWoodStock", "upgStoneStock", "upgIronStock", "upgWheatStock", "upgScarcity3"); tutorialMessage("tax"); achieve("achTrader"); },
                 locked: true,
                 bought: false
             },
@@ -3211,7 +3242,7 @@ function newGame() {
                         base: 25
                     }
                 },
-                effect: function () { unlock("trdDiamond2", "trdGold2", "upgClarity"); },
+                effect: function () { unlock("trdDiamond2", "trdGold2", "upgClarity", "upgMasonry4"); },
                 locked: true,
                 bought: false
             },
@@ -3579,7 +3610,7 @@ function newGame() {
                 },
                 effect: function () {
                     advanceAge(this, 1);
-                    unlock("iron", "sawmill", "stoneQuarry", "foundry", "upgStoneTap", "upgCasingWater", "upgCasingWood", "upgCasingStone", "upgCasingIron", "upgDeepDigging", "upgMonarchy", "upgVassalism", "upgWaterTap2");
+                    unlock("iron", "sawmill", "stoneQuarry", "foundry", "upgStoneTap", "upgCasingWater", "upgCasingWood", "upgCasingStone", "upgCasingIron", "upgDeepDigging", "upgMonarchy", "upgVassalism", "upgWaterTap2", "upgWoodTap2", "advMonasticism", "ldrCicero");
                     upgradeWorkerRate("waterFetcher", this.waterRate);
                     upgradeWorkerRate("lumberjack", this.woodRate);
                     upgradeWorkerRate("miner", this.stoneRate);
@@ -3588,8 +3619,8 @@ function newGame() {
                     upgradeMaxValue("stone", this.stoneMax);
                     tutorialMessage("upgrades");
                     achieve("achLord");
-                    if (game.player.colonies >= 5) unlock("ldrCicero");
                 },
+                canUnlock: function () { return game.upgrades.upgMasonry.bought && game.upgrades.upgWoodenStorage.bought; },
                 locked: true,
                 bought: false
             },
@@ -3626,7 +3657,7 @@ function newGame() {
                 },
                 effect: function () {
                     advanceAge(this, 0);
-                    unlock("grainMill", "upgWheatTap", "upgCommerce", "upgScarcity", "upgMetalwork", "upgMotivation", "upgStoneStorage", "upgFarmhouses", "upgHarvest", "upgIronBasket", "upgLanterns");
+                    unlock("grainMill", "upgWheatTap", "upgCommerce", "upgScarcity", "upgMetalwork", "upgMotivation", "upgStoneStorage", "upgFarmhouses", "upgHarvest", "upgIronBasket", "upgLanterns", "upgWaterTap3", "upgMasonry3", "upgStonework2", "advEcumenism");
                     upgradeMaxValue("waterP", this.waterMax);
                     upgradeMaxValue("woodP", this.woodMax);
                     upgradeMaxValue("stoneP", this.stoneMax);
@@ -3678,7 +3709,7 @@ function newGame() {
                 },
                 effect: function () {
                     advanceAge(this, 2);
-                    unlock("reset", "prestige", "diamond", "trdDiamond", "jewelry", "upgSilverTap", "upgPrestigePoint", "upgAqueducts", "upgFineLumber", "upgHeavyMining", "upgBetterFoundries", "upgRestraint", "upgTreeCare", "upgFarmWork");
+                    unlock("reset", "prestige", "diamond", "trdDiamond", "jewelry", "upgSilverTap", "upgPrestigePoint", "upgAqueducts", "upgFineLumber", "upgHeavyMining", "upgBetterFoundries", "upgRestraint", "upgTreeCare", "upgFarmWork", "ldrGutenberg");
                     upgradeMaxValue("waterP", this.waterMax);
                     upgradeMaxValue("woodP", this.woodMax);
                     upgradeMaxValue("stoneP", this.stoneMax);
@@ -3750,7 +3781,7 @@ function newGame() {
                 },
                 advCost: 1,
                 rate: -0.15,
-                effect: function () { upgradeUpgradeCost(this.rate) },
+                effect: function () { upgradeUpgradeCost(this.rate); unlock("ldrAlexander3"); },
                 locked: true,
                 bought: false
             },
@@ -3761,7 +3792,7 @@ function newGame() {
                 description: function () { return "Major civilizational breakthrough that will grant <b>" + prettify(this.clickRate * 100, 2, true) + "% more resource progress</b> when <b>clicking to gather resources</b>. This effect compounds with other clicking-related upgrades."; },
                 advCost: 1,
                 clickRate: 0.3,
-                effect: function () { upgradePlayerClickGain(this.clickRate); achieve("achLight"); },
+                effect: function () { upgradePlayerClickGain(this.clickRate); unlock("ldrAlexander3"); achieve("achLight"); },
                 locked: true,
                 bought: false
             },
@@ -3772,7 +3803,7 @@ function newGame() {
                 description: function () { return "This wonderful invention will allow you to gather <b>7.5%</b> more resources when completing a <b>Progress Bar</b>. This effect compounds with other upgrades."; },
                 advCost: 1,
                 rate: 0.075,
-                effect: function () { upgradePlayerParentGain(this.rate); },
+                effect: function () { upgradePlayerParentGain(this.rate); unlock("ldrAlexander3");; },
                 locked: true,
                 bought: false
             },
@@ -3837,7 +3868,7 @@ function newGame() {
                 parent: "upgFeudalAge",
                 description: function () { return "This unique invention will not provide immediate benefits to you, but it will pave the way to the future. Unlocks <b>Additional Advancements</b> in the <b>Next Age</b>!"; },
                 advCost: 1,
-                effect: function () { unlock("advLiteracy", "advEngineering"); },
+                effect: function () { unlock("advLiteracy", "advEngineering", "advEvangelism", "advArchitecture"); },
                 locked: true,
                 bought: false
             },
@@ -3857,6 +3888,7 @@ function newGame() {
                 },
                 advCost: 1,
                 effect: function () { unlock("monk"); },
+                canUnlock: function () { return game.player.colonies >= 5 && game.upgrades.upgFeudalAge.bought; },
                 locked: true,
                 bought: false,
                 secret: true
@@ -3912,6 +3944,7 @@ function newGame() {
                 description: function () { return "Unite your population in faith through reformations of your doctrines. Provides a passive, permanent gain of <b>+5 Wheat per second</b>."; },
                 advCost: 1,
                 effect: function () { buyPassive(getFromText("psvEcumenism")); },
+                canUnlock: function () { return game.player.colonies >= 8 && game.upgrades.upgDarkAge.bought; },
                 locked: true,
                 bought: false,
                 secret: true
@@ -4010,6 +4043,7 @@ function newGame() {
                 advCost: 2,
                 rate: 1,
                 effect: function () { upgradeMaxLeaders(this.rate); },
+                canUnlock: function () { return game.leaders.ldrGutenberg.bought && game.advancements.advPrintingPress.bought; },
                 locked: true,
                 bought: false,
                 secret: true
@@ -4022,6 +4056,7 @@ function newGame() {
                 advCost: 2,
                 rate: -0.2,
                 effect: function () { upgradeWorkerRate("sawmill", this.rate); },
+                canUnlock: function () { return game.leaders.ldrGutenberg.bought && game.advancements.advPrintingPress.bought; },
                 locked: true,
                 bought: false,
                 secret: true
@@ -4863,7 +4898,7 @@ function newGame() {
                 name: "achCraven",
                 label: "Craven",
                 description: function () { return "Hire your first <b>Miner</b> without having a single <b>Water Fetcher</b> or <b>Lumberjack</b> under your employ. Why would you do this?"; },
-                progress: function () { return game.workers.waterFetcher.current > 0 || game.workers.lumberjack.current > 0 ? "You hired a water fetcher and/or a lumberjack." : "Miners: " + Math.min(game.workers.miner.current, 1) + "/1"; },
+                progress: function () { return (game.workers.waterFetcher.current - game.workers.waterFetcher.free) > 0 || (game.workers.lumberjack.current - game.workers.lumberjack.free) > 0 ? "You hired a water fetcher and/or a lumberjack." : "Miners: " + Math.min(game.workers.miner.current, 1) + "/1"; },
                 points: 1,
                 hidden: false,
                 achieved: false
@@ -4874,6 +4909,15 @@ function newGame() {
                 fullLabel: "Back to the Smithy with you",
                 description: function () { return "Hire a total of <b>25 Ironsmiths</b>. Wait a minute, are you even paying these people?"; },
                 progress: function () { return "Ironsmiths: " + Math.min(game.workers.ironsmith.current, 25) + "/25"; },
+                points: 1,
+                hidden: false,
+                achieved: false
+            },
+            achMonk: {
+                name: "achMonk",
+                label: "Monk",
+                description: function () { return "Hire a total of <b>25 Monks</b> and receive the first passive bonus granted by their pious fervor."; },
+                progress: function () { return "Monks: " + Math.min(game.workers.monk.current, 25) + "/25"; },
                 points: 1,
                 hidden: false,
                 achieved: false
@@ -4978,6 +5022,14 @@ function newGame() {
                 description: function () { return "Recruit your first <b>Leader</b>. May you heed their advice."; },
                 points: 0,
                 hidden: false,
+                achieved: false
+            },
+            achMathematician: {
+                name: "achMathematician",
+                label: "The Mathematician",
+                description: function () { return "You have acquired <b>Pythagoras of Samos</b> as one of your counselors. A most impressive acquisition."; },
+                points: 1,
+                hidden: true,
                 achieved: false
             },
             achGreatOne: {
