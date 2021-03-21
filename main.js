@@ -400,7 +400,7 @@ function leaderGreeting(leader) {
             messages = ["Out with it.", "For " + empire + "!", "Godspeed.", "Your orders?", "For victory.", "Hail.", "My liege.", "None can stand before us."];
             break;
         case "pious":
-            messages = ["May God grant us victory.", "God watches over us.", "By the grace of God.", "We shall strive to earn God's favor."]
+            messages = ["May God grant us victory.", "God watches over us.", "By the grace of God.", "We shall strive to earn God's favor."];
             break;
         default:
             messages = ["Hail, monarch.", "Well met.", "Salutations.", "My regards."];
@@ -410,7 +410,70 @@ function leaderGreeting(leader) {
 }
 
 /**
+ * One of the player's hired leaders advises the player on what to purchase.
+ * 
+ * @param {string} age The age that was just unlocked.
+ */
+function leaderAdvice(age) {
+    var leaderList = [];
+    var empire = getEmpireLabel();
+    var Empire = getEmpireLabel(true);
+    for (var ldr in game.leaders) {
+        if (!game.leaders[ldr].bought) continue;
+        var leader = game.leaders[ldr];
+        for (var adv in game.advancements) {
+            var advancement = game.advancements[adv];
+            if (advancement.parent != age || advancement.locked || advancement.bought) continue;
+            if ((!leader.favored || !leader.favored.includes(adv)) && (!leader.unfavored || !leader.unfavored.includes(adv))) continue;
+            leaderList.push({
+                leader: leader.label,
+                personality: leader.personality,
+                advancement: advancement.label,
+                position: leader.favored.includes(adv) ? "favor" : "unfavor"
+            });
+        }
+    }
+
+    if (leaderList.length < 1) return;
+    var leaderPick = getRandom(leaderList);
+    var messages = [];
+    switch (leaderPick.personality) {
+        case "wise":
+            if (leaderPick.position == "favor") {
+                messages = ["It would be wise of you to research <b>" + leaderPick.advancement + "</b>.", "May I recommend researching <b>" + leaderPick.advancement + "</b>?"];
+            } else {
+                messages = ["I do not think " + empire + " would benefit from <b>" + leaderPick.advancement + "</b>.", "I suggest avoiding the <b>" + leaderPick.advancement + "</b> advancement."];
+            }
+            break;
+        case "stern":
+            if (leaderPick.position == "favor") {
+                messages = ["No doubt <b>" + leaderPick.advancement + "</b> would be worth the cost.", Empire + " would be better off with the <b>" + leaderPick.advancement + "</b> advancement.",
+                "I urge you to consider purchasing <b>" + leaderPick.advancement + "</b>."];
+            } else {
+                messages = ["<b>" + leaderPick.advancement + "</b> seems like a waste of time.", "I advise against researching <b>" + leaderPick.advancement + "</b>."];
+            }
+            break;
+        case "pious":
+            if (leaderPick.position == "favor") {
+                messages = ["I sense the <b>" + leaderPick.advancement + "</b> advancement has a lot of potential.", "My liege, <b>" + leaderPick.advancement + "</b> would change " + empire + " for the better."];
+            } else {
+                messages = ["I see no reason to invest in <b>" + leaderPick.advancement + "</b>.", "Wasting points on the <b>" + leaderPick.advancement + "</b> advancement would be a sin."];
+            }
+            break;
+        default:
+            if (leaderPick.position == "favor") {
+                messages = ["<b>" + leaderPick.advancement + "</b> seems like a wise investment.", Empire + " could use <b>" + leaderPick.advancement + "</b>."];
+            } else {
+                messages = ["This <b>" + leaderPick.advancement + "</b> seems like a poor investment.", "I advise against choosing <b>" + leaderPick.advancement + "</b>."];
+            }
+    }
+
+    message("<b>" + leaderPick.leader + "</b>: \"" + getRandom(messages) + "\"");
+}
+
+/**
  * One of the player's hired leaders sends a message to the player.
+ * 
  * @param {object} advancement The specific advancement purchased.
  */
 function leaderMessage(advancement) {
@@ -431,7 +494,8 @@ function leaderMessage(advancement) {
         }
     }
 
-    var i = Math.floor(Math.random() * leaderList.length);
+    if (leaderList.length < 1) return;
+    var i = Math.floor(Math.floor(Math.random() * leaderList.length));
     var leader = game.leaders[leaderList[i]];
     var favor = favoringList[i];
 
@@ -454,8 +518,8 @@ function leaderMessage(advancement) {
             Empire + " doesn't need <b>" + advancement.label + "</b> to prosper."
         ];
     }
-    var msg = "<b>" + leader.label + "</b>: \"" + getRandom(availableMessages) + "\"";
-    message(msg);
+
+    message("<b>" + leader.label + "</b>: \"" + getRandom(availableMessages) + "\"");
 }
 
 /**
@@ -956,6 +1020,7 @@ function buyBuilding(building, number, forFree = false) {
     if (!building || (!forFree && !canAfford(building))) return;
     building.current += number;
     if (forFree) building.free += number;
+    if (building.effect) building.effect();
     for (var res in building.resourceCost) {
         if (forFree) break;
         var resource = getFromText(res);
@@ -975,6 +1040,11 @@ function buyBuilding(building, number, forFree = false) {
  */
 function buyUpgrade(upgrade) {
     if (!upgrade || !canAfford(upgrade)) return;
+    var isBought = false;
+    if (typeof upgrade.level === "undefined" || upgrade.level >= upgrade.maxLevel) {
+        isBought = true;
+        upgrade.bought = true;
+    }
     upgrade.effect();
 
     for (var res in upgrade.resourceCost) {
@@ -985,14 +1055,14 @@ function buyUpgrade(upgrade) {
     }
     if (typeof upgrade.goldCost !== "undefined") gainGold(-upgrade.goldCost);
 
-    if (typeof upgrade.level === "undefined" || upgrade.level >= upgrade.maxLevel) {
-        upgrade.bought = true;
+    if (isBought) {
         tooltip();
     } else {
         upgrade.level++;
     }
     recalculateUpgradeCost(upgrade);
     updateUpgradeValues(upgrade, true);
+    if (upgrade.type && upgrade.type == "age") leaderAdvice(upgrade.name);
 }
 
 /**
@@ -1002,6 +1072,8 @@ function buyUpgrade(upgrade) {
  */
 function buyLeader(leader) {
     if (!leader || leader.bought || game.player.currentLeaders >= game.player.maxLeaders || !canAfford(leader)) return;
+    if (!game.achievements.achInformed.achieved) achieve("achInformed");
+    leader.bought = true;
     leader.effect();
     for (var res in leader.resourceCost) {
         var resource = getFromText(res);
@@ -1010,7 +1082,6 @@ function buyLeader(leader) {
         updateResValues(resource, true)
     }
     if (leader.advCost) addAdvancementPoints(-leader.advCost);
-    leader.bought = true;
     game.player.currentLeaders++;
     updateLeaderValues(leader, true);
     leaderGreeting(leader);
@@ -1026,8 +1097,8 @@ function buyLeader(leader) {
  */
 function buyAdvancement(advancement, forFree = false) {
     if (!advancement || advancement.bought || (!forFree && !canAfford(advancement))) return;
-    advancement.effect();
     advancement.bought = true;
+    advancement.effect();
     if (!forFree) addAdvancementPoints(-advancement.advCost);
     else updateAdvancementValues(true);
 }
@@ -1478,6 +1549,7 @@ function canAfford(what) {
     if (game.player.advancementPoints < what.advCost) return false;
     if (game.player.gold < what.goldCost) return false;
     if (game.player.prestigePoints < what.ptgCost) return false;
+    if (game.player.colonies < what.colonies) return false;
     return true;
 }
 
@@ -1818,6 +1890,7 @@ function unlock(...what) {
         if (itemType == "resources" && item.name.indexOf("Progress") === -1) {
             itemP = getFromText(what[i] + "P");
         } else if (itemType == "leaders" && !game.upgrades.upgLeaders.bought) continue;
+        else if (item.hasOwnProperty("canUnlock") && !item.canUnlock()) continue;
         item.locked = false;
         if (itemP) itemP.locked = false;
         if (!containers.includes(itemType)) containers.push(itemType);
@@ -2411,6 +2484,12 @@ function prestigeReset() {
     carryover.settings.tutorialCompleted = false;
     carryover.prestiges = game.prestiges;
     carryover.achievements = game.achievements;
+    carryover.upgrades = {
+        upgLeaders: {
+            locked: game.upgrades.upgLeaders.locked,
+            bought: game.upgrades.upgLeaders.bought
+        }
+    };
 
     var loadString = LZString.compressToBase64(JSON.stringify(carryover));
     if (!load(loadString)) message("There was a problem with resetting the game.", "warning");
@@ -2418,10 +2497,14 @@ function prestigeReset() {
     if (game.player.colonies <= 1) tutorialMessage("prestige3");
     if (game.settings.skipFirstUpg) clickBuy("upgWater");
     if (leadersUnlocked) {
-        clickBuy("upgLeaders");
         unlock.apply(this, leadersList);
     }
     message("A new colony was built: <b>" + game.player.empireName + "</b>.");
+
+    if (!game.achievements.achColonist.achieved && game.player.colonies > 0) achieve("achColonist");
+    else if (!game.achievements.achPioneer.achieved && game.player.colonies >= 5) achieve("achPioneer");
+    else if (!game.achievements.achLuminary.achieved && game.player.colonies >= 10) achieve("achLuminary");
+    else if (!game.achievements.achPatrician.achieved && game.player.colonies >= 30) achieve("achPatrician");
 }
 
 /**
@@ -2740,6 +2823,7 @@ function updateGraphics() {
  */
 function updateAvailableUpgrades(active = false) {
     //available upgrades based on passive actions
+    if (!active && !game.upgrades.upgJewelers.locked) return;
     if (game.upgrades.upgBucket.locked && game.resources.wood.current >= 1) { unlock("upgBucket"); tutorialMessage("levels"); }
     else if (game.upgrades.upgBarrels.locked && game.resources.water.current == game.resources.water.max && game.resources.wood.current >= 1) unlock("upgBarrels");
     else if (game.upgrades.upgShed.locked && game.resources.wood.current == game.resources.wood.max) unlock("upgShed");
@@ -2751,52 +2835,9 @@ function updateAvailableUpgrades(active = false) {
 
     if (!active) return;
 
-    //available upgrades based on user actions
-    if (game.upgrades.upgLeaders.locked && game.player.colonies >= 2) unlock("upgLeaders");
-    if (game.upgrades.upgWaterTap.locked && game.upgrades.upgBarrels.bought) unlock("upgWaterTap");
-    else if (game.upgrades.upgWaterTap2.locked && game.upgrades.upgWaterTap.bought && game.upgrades.upgFeudalAge.bought) unlock("upgWaterTap2");
-    else if (game.upgrades.upgWaterTap3.locked && game.upgrades.upgWaterTap2.bought && game.upgrades.upgDarkAge.bought) unlock("upgWaterTap3");
-    if (game.upgrades.upgWoodTap2.locked && game.upgrades.upgWoodTap.bought && game.upgrades.upgFeudalAge.bought) unlock("upgWoodTap2");
-    else if (game.upgrades.upgWoodTap3.locked && game.upgrades.upgWoodTap2.bought && game.upgrades.upgSlopeMining.bought) unlock("upgWoodTap3");
-    if (game.upgrades.upgStoneTap3.locked && game.upgrades.upgStoneTap2.bought && game.upgrades.upgSlopeMining.bought) unlock("upgStoneTap3");
-    if (game.upgrades.upgMasonry2.locked && game.upgrades.upgMasonry.bought && game.upgrades.upgVassalism.bought) unlock("upgMasonry2");
-    else if (game.upgrades.upgMasonry3.locked && game.upgrades.upgMasonry2.bought && game.upgrades.upgDarkAge.bought) unlock("upgMasonry3");
-    else if (game.upgrades.upgMasonry4.locked && game.upgrades.upgMasonry3.bought && game.upgrades.upgDiamondTrade.bought) unlock("upgMasonry4");
-    if (game.upgrades.upgStonework2.locked && game.upgrades.upgStonework.bought && game.upgrades.upgDarkAge.bought) unlock("upgStonework2");
-    if (game.upgrades.upgFeudalAge.locked && game.upgrades.upgMasonry.bought && game.upgrades.upgWoodenStorage.bought) unlock("upgFeudalAge");
-    else if (game.upgrades.upgRenaissance.locked && game.upgrades.upgIronBasket.bought) unlock("upgRenaissance");
-    else if (game.upgrades.upgRevolutionAge.locked && game.player.colonies >= 1 && game.upgrades.upgDiamondStorage2.bought && game.upgrades.upgSilverwork.bought) unlock("upgRevolutionAge");
-    if (game.upgrades.upgScarcity3.locked && game.upgrades.upgScarcity2.bought && game.upgrades.upgEconomics.bought) unlock("upgScarcity3");
-    if (game.upgrades.upgNourishment2.locked && game.player.colonies >= 3 && game.upgrades.upgNourishment.bought && game.upgrades.upgIrrigation.bought) unlock("upgNourishment2");
-    if (game.advancements.advMonasticism.locked && game.player.colonies >= 5 && game.upgrades.upgFeudalAge.bought) unlock("advMonasticism");
-    if (game.advancements.advEcumenism.locked && game.player.colonies >= 8 && game.upgrades.upgDarkAge.bought) unlock("advEcumenism");
-
     //check for achievements
-    if (!game.achievements.achThirsty.achieved && game.workers.waterFetcher.current > 0) achieve("achThirsty");
-    else if (!game.achievements.achMetalCaster.achieved && game.buildings.foundry.current > 0) achieve("achMetalCaster");
-    else if (!game.achievements.achHungry.achieved && game.workers.farmer.current > 0) achieve("achHungry");
-    else if (!game.achievements.achCraven.achieved && game.workers.waterFetcher.current < 1 && game.workers.lumberjack.current < 1 && game.workers.miner.current > 0) achieve("achCraven");
-    else if (!game.achievements.achColonist.achieved && game.player.colonies > 0) achieve("achColonist");
-    else if (!game.achievements.achInformed.achieved && game.player.currentLeaders > 0) achieve("achInformed");
-    else if (!game.achievements.achPioneer.achieved && game.player.colonies >= 5) achieve("achPioneer");
-    else if (!game.achievements.achLuminary.achieved && game.player.colonies >= 10) achieve("achLuminary");
-    else if (!game.achievements.achForeman.achieved && game.buildings.stoneQuarry.current >= 15) achieve("achForeman");
-    else if (!game.achievements.achSmithy.achieved && game.workers.ironsmith.current >= 25) achieve("achSmithy");
-    else if (!game.achievements.achWillOfThePeople.achieved && game.buildings.waterMill.current >= 20 && game.buildings.grainMill.current >= 20 && getAmountTrades() < 1) achieve("achWillOfThePeople");
+    if (!game.achievements.achWillOfThePeople.achieved && game.buildings.waterMill.current >= 20 && game.buildings.grainMill.current >= 20 && getAmountTrades() < 1) achieve("achWillOfThePeople");
     else if (!game.achievements.achPolymath.achieved && getAmountTrades() >= 100 && getAmountUpgrades() >= 100) achieve("achPolymath");
-    else if (!game.achievements.achPatrician.achieved && game.player.colonies >= 30) achieve("achPatrician");
-
-    //leaders
-    if (!game.upgrades.upgLeaders.bought) return;
-    if (game.leaders.ldrGilgamesh.locked) unlock("ldrGilgamesh", "ldrPythagoras");
-    if (game.leaders.ldrNebuchadnezzar.locked && game.player.colonies >= 3) unlock("ldrNebuchadnezzar");
-    if (game.leaders.ldrAlexander3.locked && game.advancements.advTemperance.bought && game.advancements.advFire.bought && game.advancements.advWheel.bought) unlock("ldrAlexander3");
-    if (game.leaders.ldrCharlemagne.bought) {
-        if (game.upgrades.upgEducation.locked && game.upgrades.upgAgriculture.bought) unlock("upgEducation");
-        if (game.upgrades.upgTheology2.locked && game.advancements.advTheology.bought) unlock("upgTheology2");
-    }
-    if (game.leaders.ldrGutenberg.locked && game.leaders.ldrCharlemagne.bought && game.upgrades.upgRenaissance.bought) unlock("ldrGutenberg");
-    else if (game.leaders.ldrGutenberg.bought && game.advancements.advPrintingPress.bought) unlock("advEvangelism", "advArchitecture");
 }
 
 /**
@@ -3246,6 +3287,7 @@ function tooltip(what = "hide", event = null, repositionTooltip = true) {
         } else if (itemType == "upgrades") {
             titleText = (item.fullLabel ? item.fullLabel : item.label) + (item.level > 0 ? " (" + item.level + "/" + item.maxLevel + ")" : "");
             mainText = item.description();
+            if (item.colonies > 0 && item.colonies > game.player.colonies) mainText += "<br /><span style='color: red;'>You need to have built at least <b>" + item.colonies + (item.colonies > 1 ? " Colonies" : " Colony") + "</b> to purchase this upgrade.</span>"
             var tempBottomText = getCostLabel(item);
             if (tempBottomText.length < 1) bottomText = "<span style='color: green;'>This upgrade is free!</span>";
             else bottomText = tempBottomText;
