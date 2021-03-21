@@ -271,6 +271,7 @@ function newGame() {
                         rate: 1.25
                     }
                 },
+                effect: function () { achieve("achThirsty"); },
                 locked: true
             },
             lumberjack: {
@@ -329,6 +330,7 @@ function newGame() {
                         rate: 1.35
                     }
                 },
+                effect: function () { if ((game.workers.waterFetcher.current - game.workers.waterFetcher.free) < 1 && (game.workers.lumberjack.current - game.workers.lumberjack.free) < 1) achieve("achCraven"); },
                 locked: true
             },
             ironsmith: {
@@ -352,6 +354,7 @@ function newGame() {
                         rate: 1.25
                     }
                 },
+                effect: function () { if (this.current >= 25) achieve("achSmithy"); },
                 locked: true
             },
             farmer: {
@@ -378,6 +381,7 @@ function newGame() {
                         rate: 1.25
                     }
                 },
+                effect: function () { achieve("achHungry"); },
                 locked: true
             },
             silversmith: {
@@ -531,7 +535,7 @@ function newGame() {
                     }
                 },
                 effect: function () {
-                    if (this.current == 25) { 
+                    if (this.current == 25) {
                         upgradeBuildingCost(-0.02);
                         achieve("achMonk");
                     }
@@ -641,6 +645,7 @@ function newGame() {
                         rate: 1.25
                     }
                 },
+                effect: function () { if (this.current >= 15) achieve("achForeman"); },
                 locked: true
             },
             foundry: {
@@ -673,6 +678,7 @@ function newGame() {
                         rate: 1.35
                     }
                 },
+                effect: function () { achieve("achMetalCaster"); },
                 locked: true
             },
             grainMill: {
@@ -1091,7 +1097,7 @@ function newGame() {
                 goldBase: 100,
                 goldRate: 10,
                 resourceCost: {},
-                effect: function () { addAdvancementPoints(this.rate); },
+                effect: function () { addAdvancementPoints(this.rate); achieve("achGlitters"); },
                 locked: true
             }
         },
@@ -1266,7 +1272,7 @@ function newGame() {
                     }
                 },
                 effect: function () { upgradeWorkerCost(this.rate); upgradeUpgradeCost(this.rate); },
-                canUnlock: function() { return game.player.colonies >= 5; },
+                canUnlock: function () { return game.player.colonies >= 5; },
                 favored: ["advTemperance", "advPiety", "advBrotherhood"],
                 unfavored: ["advPrintingPress", "advNavigation", "advDominion"],
                 locked: true,
@@ -2426,7 +2432,7 @@ function newGame() {
                     }
                 },
                 effect: function () { upgradeWorkerRate("farmer", this.rate); },
-                canUnlock: function() { return game.player.colonies >= 3 && game.upgrades.upgNourishment.bought && game.upgrades.upgIrrigation.bought; },
+                canUnlock: function () { return game.player.colonies >= 3 && game.upgrades.upgNourishment.bought && game.upgrades.upgIrrigation.bought; },
                 locked: true,
                 bought: false
             },
@@ -2474,7 +2480,7 @@ function newGame() {
                     }
                 },
                 effect: function () { upgradeWorkerRate("farmer", this.rate); },
-                canUnlock: function () { return game.leaders.ldrCharlemagne.bought &&  game.upgrades.upgAgriculture.bought; },
+                canUnlock: function () { return game.leaders.ldrCharlemagne.bought && game.upgrades.upgAgriculture.bought; },
                 locked: true,
                 bought: false
             },
@@ -2613,7 +2619,7 @@ function newGame() {
                         rate: 1.35
                     }
                 },
-                effect: function () { 
+                effect: function () {
                     unlock("silver", "upgSilversmith", "upgSilverBucket", "upgSilverAxe", "upgSilverPickaxe", "upgSilverSickle", "upgWoodTap3", "upgStoneTap3");
                     upgradeMaxValue("stoneP", this.rate);
                     if (this.level == this.maxLevel) unlock("upgIronTap");
@@ -4089,7 +4095,7 @@ function newGame() {
                 description: function () { return "Install a gold-backed monetary system to support the exchange of goods between your population. You will be granted a one-time payment of <b>" + prettify(this.rate, 0, true) + " Gold</b> upon acquiring this advancement."; },
                 advCost: 3,
                 rate: 100000,
-                effect: function () { gainGold(this.rate); },
+                effect: function () { gainGold(this.rate); achieve("achBanker"); },
                 locked: true,
                 bought: false
             },
@@ -4936,6 +4942,14 @@ function newGame() {
                 label: "Theologian",
                 fullLabel: "Theologian",
                 description: function () { return "Research the <b>Theology</b> advancement."; },
+                points: 1,
+                hidden: false,
+                achieved: false
+            },
+            achBanker: {
+                name: "achBanker",
+                label: "Banker",
+                description: function () { return "Discover the benefits of <b>Banking</b>."; },
                 points: 1,
                 hidden: false,
                 achieved: false

@@ -400,7 +400,7 @@ function leaderGreeting(leader) {
             messages = ["Out with it.", "For " + empire + "!", "Godspeed.", "Your orders?", "For victory.", "Hail.", "My liege.", "None can stand before us."];
             break;
         case "pious":
-            messages = ["May God grant us victory.", "God watches over us.", "By the grace of God.", "We shall strive to earn God's favor."]
+            messages = ["May God grant us victory.", "God watches over us.", "By the grace of God.", "We shall strive to earn God's favor."];
             break;
         default:
             messages = ["Hail, monarch.", "Well met.", "Salutations.", "My regards."];
@@ -410,7 +410,70 @@ function leaderGreeting(leader) {
 }
 
 /**
+ * One of the player's hired leaders advises the player on what to purchase.
+ * 
+ * @param {string} age The age that was just unlocked.
+ */
+function leaderAdvice(age) {
+    var leaderList = [];
+    var empire = getEmpireLabel();
+    var Empire = getEmpireLabel(true);
+    for (var ldr in game.leaders) {
+        if (!game.leaders[ldr].bought) continue;
+        var leader = game.leaders[ldr];
+        for (var adv in game.advancements) {
+            var advancement = game.advancements[adv];
+            if (advancement.parent != age || advancement.locked || advancement.bought) continue;
+            if ((!leader.favored || !leader.favored.includes(adv)) && (!leader.unfavored || !leader.unfavored.includes(adv))) continue;
+            leaderList.push({
+                leader: leader.label,
+                personality: leader.personality,
+                advancement: advancement.label,
+                position: leader.favored.includes(adv) ? "favor" : "unfavor"
+            });
+        }
+    }
+
+    if (leaderList.length < 1) return;
+    var leaderPick = getRandom(leaderList);
+    var messages = [];
+    switch (leaderPick.personality) {
+        case "wise":
+            if (leaderPick.position == "favor") {
+                messages = ["It would be wise of you to research <b>" + leaderPick.advancement + "</b>.", "May I recommend researching <b>" + leaderPick.advancement + "</b>?"];
+            } else {
+                messages = ["I do not think " + empire + " would benefit from <b>" + leaderPick.advancement + "</b>.", "I suggest avoiding the <b>" + leaderPick.advancement + "</b> advancement."];
+            }
+            break;
+        case "stern":
+            if (leaderPick.position == "favor") {
+                messages = ["No doubt <b>" + leaderPick.advancement + "</b> would be worth the cost.", Empire + " would be better off with the <b>" + leaderPick.advancement + "</b> advancement.",
+                "I urge you to consider purchasing <b>" + leaderPick.advancement + "</b>."];
+            } else {
+                messages = ["<b>" + leaderPick.advancement + "</b> seems like a waste of time.", "I advise against researching <b>" + leaderPick.advancement + "</b>."];
+            }
+            break;
+        case "pious":
+            if (leaderPick.position == "favor") {
+                messages = ["I sense the <b>" + leaderPick.advancement + "</b> advancement has a lot of potential.", "My liege, <b>" + leaderPick.advancement + "</b> would change " + empire + " for the better."];
+            } else {
+                messages = ["I see no reason to invest in <b>" + leaderPick.advancement + "</b>.", "Wasting points on the <b>" + leaderPick.advancement + "</b> advancement would be a sin."];
+            }
+            break;
+        default:
+            if (leaderPick.position == "favor") {
+                messages = ["<b>" + leaderPick.advancement + "</b> seems like a wise investment.", Empire + " could use <b>" + leaderPick.advancement + "</b>."];
+            } else {
+                messages = ["This <b>" + leaderPick.advancement + "</b> seems like a poor investment.", "I advise against choosing <b>" + leaderPick.advancement + "</b>."];
+            }
+    }
+
+    message("<b>" + leaderPick.leader + "</b>: \"" + getRandom(messages) + "\"");
+}
+
+/**
  * One of the player's hired leaders sends a message to the player.
+ * 
  * @param {object} advancement The specific advancement purchased.
  */
 function leaderMessage(advancement) {
@@ -455,8 +518,8 @@ function leaderMessage(advancement) {
             Empire + " doesn't need <b>" + advancement.label + "</b> to prosper."
         ];
     }
-    var msg = "<b>" + leader.label + "</b>: \"" + getRandom(availableMessages) + "\"";
-    message(msg);
+
+    message("<b>" + leader.label + "</b>: \"" + getRandom(availableMessages) + "\"");
 }
 
 /**
@@ -957,6 +1020,7 @@ function buyBuilding(building, number, forFree = false) {
     if (!building || (!forFree && !canAfford(building))) return;
     building.current += number;
     if (forFree) building.free += number;
+    if (building.effect) building.effect();
     for (var res in building.resourceCost) {
         if (forFree) break;
         var resource = getFromText(res);
@@ -998,6 +1062,7 @@ function buyUpgrade(upgrade) {
     }
     recalculateUpgradeCost(upgrade);
     updateUpgradeValues(upgrade, true);
+    if (upgrade.type && upgrade.type == "age") leaderAdvice(upgrade.name);
 }
 
 /**
@@ -2771,14 +2836,7 @@ function updateAvailableUpgrades(active = false) {
     if (!active) return;
 
     //check for achievements
-    if (!game.achievements.achThirsty.achieved && game.workers.waterFetcher.current > 0) achieve("achThirsty");
-    else if (!game.achievements.achMetalCaster.achieved && game.buildings.foundry.current > 0) achieve("achMetalCaster");
-    else if (!game.achievements.achHungry.achieved && game.workers.farmer.current > 0) achieve("achHungry");
-    else if (!game.achievements.achCraven.achieved && (game.workers.waterFetcher.current - game.workers.waterFetcher.free) < 1
-        && (game.workers.lumberjack.current - game.workers.lumberjack.free) < 1 && game.workers.miner.current > 0) achieve("achCraven");
-    else if (!game.achievements.achForeman.achieved && game.buildings.stoneQuarry.current >= 15) achieve("achForeman");
-    else if (!game.achievements.achSmithy.achieved && game.workers.ironsmith.current >= 25) achieve("achSmithy");
-    else if (!game.achievements.achWillOfThePeople.achieved && game.buildings.waterMill.current >= 20 && game.buildings.grainMill.current >= 20 && getAmountTrades() < 1) achieve("achWillOfThePeople");
+    if (!game.achievements.achWillOfThePeople.achieved && game.buildings.waterMill.current >= 20 && game.buildings.grainMill.current >= 20 && getAmountTrades() < 1) achieve("achWillOfThePeople");
     else if (!game.achievements.achPolymath.achieved && getAmountTrades() >= 100 && getAmountUpgrades() >= 100) achieve("achPolymath");
 }
 
