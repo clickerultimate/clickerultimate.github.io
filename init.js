@@ -1,8 +1,8 @@
 function newGame() {
     var initData = {
         global: {
-            version: "0.2.05",
-            latestChanges: "Introducing a new Tax Ceiling (will be upgradeable in the future). Also a lot of bug fixes.",
+            version: "0.2.06",
+            latestChanges: "Leaders now advise you on which advancements to get. Fancy graphics mode has been improved.",
             start: new Date().getTime(),
             time: 0,
             speed: 10,
