@@ -2490,15 +2490,22 @@ function prestigeReset() {
             bought: game.upgrades.upgLeaders.bought
         }
     };
+    if (leadersUnlocked) {
+        carryover.leaders = game.leaders;
+        for(var ldr in leadersList) {
+            var leader = leadersList[ldr];
+            carryover.leaders[leader] = {
+                locked: game.leaders[leader].locked,
+                bought: false
+            };
+        }
+    }
 
     var loadString = LZString.compressToBase64(JSON.stringify(carryover));
     if (!load(loadString)) message("There was a problem with resetting the game.", "warning");
     applyPrestiges();
     if (game.player.colonies <= 1) tutorialMessage("prestige3");
     if (game.settings.skipFirstUpg) clickBuy("upgWater");
-    if (leadersUnlocked) {
-        unlock.apply(this, leadersList);
-    }
     message("A new colony was built: <b>" + game.player.empireName + "</b>.");
 
     if (!game.achievements.achColonist.achieved && game.player.colonies > 0) achieve("achColonist");
