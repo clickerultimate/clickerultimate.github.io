@@ -1,7 +1,7 @@
 function newGame() {
     var initData = {
         global: {
-            version: "0.2.06",
+            version: "0.2.07",
             latestChanges: "Leaders now advise you on which advancements to get. Fancy graphics mode has been improved.",
             start: new Date().getTime(),
             time: 0,
@@ -4330,15 +4330,14 @@ function newGame() {
                 label: "Double Clicking",
                 type: "active",
                 description: function () {
+                    var rates = [50, 40, 30, 20, 15, 10, 5, 1];
                     var desc = "This mysterious artifact will occasionally boost your resource gathering. Will sometimes <b>double</b> the resource progress gathered when you click.";
-                    if (this.level == 0) desc += " Double Clicking will occur every <b>" + this.nextRate + " clicks</b>.";
-                    else if (this.level < 8) desc += " Double Clicking rate will increase from every <b>" + this.rate + " clicks</b> to every <b>" + this.nextRate + " clicks</b>.";
-                    else desc += " Double Clicking rate will occur every <b>" + this.rate + " clicks</b>.";
+                    if (this.level == 0) desc += " Double Clicking will occur every <b>" + rates[0] + " clicks</b>.";
+                    else if (this.level < 8) desc += " Double Clicking rate will increase from every <b>" + rates[this.level - 1] + " clicks</b> to every <b>" + rates[this.level] + " clicks</b>.";
+                    else desc += " Double Clicking rate will occur every <b>" + rates[7] + " clicks</b>.";
                     return desc;
                 },
                 ptgCost: 1,
-                rate: 0,
-                nextRate: 50,
                 level: 0,
                 maxLevel: 8,
                 requirements: {
@@ -4346,9 +4345,8 @@ function newGame() {
                     ptgMechanicalClicker: 2
                 },
                 effect: function (level) {
-                    this.rate = this.nextRate;
-                    game.player.doubleClick = this.nextRate;
-                    this.nextRate -= (level >= 2 ? 5 : 10);
+                    var rates = [50, 40, 30, 20, 15, 10, 5, 1];
+                    game.player.doubleClick = this.level > 0 ? rates[this.level - 1] : 0;
                 },
                 bought: false
             },

@@ -423,7 +423,7 @@ function leaderAdvice(age) {
         var leader = game.leaders[ldr];
         for (var adv in game.advancements) {
             var advancement = game.advancements[adv];
-            if (advancement.parent != age || advancement.locked || advancement.bought) continue;
+            if (advancement.parent != age || advancement.locked || advancement.bought) continue;
             if ((!leader.favored || !leader.favored.includes(adv)) && (!leader.unfavored || !leader.unfavored.includes(adv))) continue;
             leaderList.push({
                 leader: leader.label,
@@ -931,10 +931,10 @@ function clickBuy(what) {
     if (!item || !type) return;
     switch (type) {
         case "workers":
-            buyWorker(item, 1);
+            buyWorker(item, window.event.ctrlKey ? -1 : 1);
             break;
         case "buildings":
-            buyBuilding(item, 1);
+            buyBuilding(item, window.event.ctrlKey ? -1 : 1);
             break;
         case "upgrades":
             buyUpgrade(item);
@@ -993,12 +993,12 @@ function gainResource(resource, number, active = false) {
  * @param {boolean} forFree Whether to get for free.
  */
 function buyWorker(worker, number, forFree = false) {
-    if (!worker || (!forFree && !canAfford(worker))) return;
+    if (!worker || (!forFree && !canAfford(worker)) || (worker.current + number) < worker.free) return;
     worker.current += number;
     if (forFree) worker.free += number;
     if (worker.effect) worker.effect();
     for (var res in worker.resourceCost) {
-        if (forFree) break;
+        if (forFree || number < 1) break;
         var resource = getFromText(res);
         resource.current = prettify(resource.current - worker.resourceCost[res].current, 2);
         gainResource(getFromText(res + "P"), 0.001); //in case progress is maxed, reset automatically
@@ -1017,12 +1017,12 @@ function buyWorker(worker, number, forFree = false) {
  * @param {boolean} forFree Whether to get for free.
  */
 function buyBuilding(building, number, forFree = false) {
-    if (!building || (!forFree && !canAfford(building))) return;
+    if (!building || (!forFree && !canAfford(building)) || (building.current + number) < building.free) return;
     building.current += number;
     if (forFree) building.free += number;
     if (building.effect) building.effect();
     for (var res in building.resourceCost) {
-        if (forFree) break;
+        if (forFree || number < 1) break;
         var resource = getFromText(res);
         resource.current = prettify(resource.current - building.resourceCost[res].current, 2);
         gainResource(getFromText(res + "P"), 0.001); //in case progress is maxed, reset automatically
@@ -2492,7 +2492,7 @@ function prestigeReset() {
     };
     if (leadersUnlocked) {
         carryover.leaders = game.leaders;
-        for(var ldr in leadersList) {
+        for (var ldr in leadersList) {
             var leader = leadersList[ldr];
             carryover.leaders[leader] = {
                 locked: game.leaders[leader].locked,
