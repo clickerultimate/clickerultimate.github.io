@@ -241,6 +241,13 @@ hr {
     border-style: solid;
 }
 
+body.ctrlDown #WorkersContainer .jbButton,
+body.ctrlDown #WorkersContainer .jbButton .jbIndicator,
+body.ctrlDown #BuildingsContainer .jbButton,
+body.ctrlDown #BuildingsContainer .jbButton .jbIndicator{
+    border-color: red;
+}
+
 .jbAge.unclickable {
     background-color: goldenrod;
     border: 1px solid gray;

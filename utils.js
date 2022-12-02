@@ -137,6 +137,17 @@ function adjective(what) {
 }
 
 /**
+ * Capitalizes the first letter of a given word.
+ * 
+ * @param {string} what The word to capitalize.
+ */
+function capitalize(what) {
+    if (!what || what.length == 0) return "";
+
+    return what.charAt(0).toUpperCase() + what.slice(1);
+}
+
+/**
  * Returns a random item from a provided list.
  * 
  * @param {Array} list 

@@ -22,6 +22,20 @@ Turn millers into bakers with new age
 Add setting to automatically purchase free upgrades
 */
 
+function firstSetup() {
+    document.body.addEventListener('keydown', function (event) {
+        if (event.ctrlKey) {
+            document.body.classList.add("ctrlDown");
+        }
+    });
+
+    document.body.addEventListener('keyup', function (event) {
+        if (!event.ctrlKey) {
+            document.body.classList.remove("ctrlDown");
+        }
+    });
+}
+
 /**
  * Controls the flow of the game by calling the main game loop.
  */
@@ -385,8 +399,7 @@ function message(content, type) {
  * 
  * @param {object} leader The hired leader.
  */
-function leaderGreeting(leader) {
-    if (!leader) return;
+function leaderFirstGreeting(leader) {
     var messages = [];
     var empire = getEmpireLabel();
     var Empire = getEmpireLabel(true);
@@ -410,6 +423,58 @@ function leaderGreeting(leader) {
 }
 
 /**
+ * A leader greets the player upon their return.
+ */
+function leaderGreeting() {
+    var leaderList = [];
+    for (var ldr in game.leaders) {
+        if (!game.leaders[ldr].bought) continue;
+        leaderList.push(game.leaders[ldr]);
+    }
+
+    if (leaderList.length < 1) return;
+
+    var greetings = [];
+    var reports = [];
+    var titles = ["Emperor", "My King", "Your Excellency", "Ruler", "sire", "Monarch", "Leader", "Your Highness", "Your Grace", "my liege", "my lord"];
+    var leader = getRandom(leaderList);
+    var title = getRandom(titles);
+    var Title = capitalize(title);
+    var empire = getEmpireLabel();
+    var Empire = getEmpireLabel(true);
+
+    switch (leader.personality) {
+        case "wise":
+            greetings = [`${capitalize(title)}, you return!`, `I hope your travels treated you well, ${title}.`, `Ahh ${title}, I was pondering when you would return to us.`];
+            break;
+        case "stern":
+            greetings = [`Godspeed ${title}.`, "Hail.", `${Title}!`, `Victory awaits, ${title}.`, `A triumphant return among us, ${title}.`, `${Title}, you're back!`];
+            break;
+        case "pious":
+            greetings = [`Blessings, ${title}.`, `You bless us with your return, ${title}?`, `Grace to you, ${title}.` `God bless, ${title}.`];
+            break;
+        default:
+            greetings = [`Hail, ${title}.`, `Greetings, ${title}.`, `Welcome back, ${title}.`, `${Title}.`];
+    }
+
+    switch (leader.personality) {
+        case "wise":
+            reports = ["Make haste, there is much to be done.", `${Empire} is in need of your guidance.`, `The people of ${empire} are in need of your guidance, ${title}.`, `Shall we tend to ${empire}?`];
+            break;
+        case "stern":
+            reports = ["Do you have orders for us?", `Still none dare stand before the might of ${empire}.`, "Say the word, and it shall be done.", `${Empire} stands at the ready.`];
+            break;
+        case "pious":
+            reports = [`God gracefully watched over ${empire} in your absence.`, `Thankfully, no harm was done to ${empire} while you were away.`, "If this pleases God, how may I be of use today?"];
+            break;
+        default:
+            reports = [`Nothing to report on ${empire} in your absence, ${title}.`, `${Empire} has prospered in your absence.`, `The people of ${empire} awaited your return.`];
+    }
+
+    message(`<b>${leader.label}</b>: "${getRandom(greetings)} ${getRandom(reports)}"`);
+}
+
+/**
  * One of the player's hired leaders advises the player on what to purchase.
  * 
  * @param {string} age The age that was just unlocked.
@@ -423,7 +488,7 @@ function leaderAdvice(age) {
         var leader = game.leaders[ldr];
         for (var adv in game.advancements) {
             var advancement = game.advancements[adv];
-            if (advancement.parent != age || advancement.locked || advancement.bought) continue;
+            if (advancement.parent != age || advancement.locked || advancement.bought) continue;
             if ((!leader.favored || !leader.favored.includes(adv)) && (!leader.unfavored || !leader.unfavored.includes(adv))) continue;
             leaderList.push({
                 leader: leader.label,
@@ -530,7 +595,7 @@ function tutorialMessage(type) {
     if (!game.settings.tutorialEnabled) return;
 
     var tutorialMessages = {
-        available: ["resources", "upgrades", "levels", "ages", "buildings", "highprogress", "themes", "tax", "prestige2", "prestige3", "tutorial"],
+        available: ["resources", "upgrades", "levels", "ages", "buildings", "highprogress", "themes", "tax", "prestige2", "prestige3", "tutorial", "selling"],
         gather: "Click on the <b>Gather</b> button above to fill the Progress Bar of a resource. Doing so will grant you resources which you can use to buy things with.",
         workers: "You can hover over the tile of a <b>Worker</b> to see what it does and how much it costs. The more workers you have, the more their effects stack!",
         workers2: "Some <b>Workers</b> have a constant cost to some resources. Be sure to read their descriptions before buying them.",
@@ -551,7 +616,8 @@ function tutorialMessage(type) {
         tutorial: "You can disable these tips by switching the tutorial off in the Settings.",
         leaders: "<b>Leaders</b> are unique characters with various benefits. It's worth mentioning you can only hire <b>one leader</b> for every colony you build, so better think twice before making your decision.",
         leaders2: "Don't be too eager to hire a <b>Leader</b>, as you will unlock more and more as your civilization progresses. As with other things, patience is a virtue.",
-        leaders3: "<b>Leaders</b> you unlock stay available for hire on your subsequent colonies. Additionally, some <b>Leaders</b> can only be unlocked under special circumstances, so don't be afraid to experiment."
+        leaders3: "<b>Leaders</b> you unlock stay available for hire on your subsequent colonies. Additionally, some <b>Leaders</b> can only be unlocked under special circumstances, so don't be afraid to experiment.",
+        selling: "You can sell <b>Workers</b> and <b>Buildings</b> by holding the ctrl key before clicking on their respective button."
     };
 
     var item = type;
@@ -603,7 +669,10 @@ function greetingMessage() {
             msg = "Welcome to Clicker Ultimate!"
     }
 
-    if (msg) message(msg);
+    if (msg) {
+        message(msg);
+        leaderGreeting();
+    }
 }
 
 /**
@@ -931,10 +1000,10 @@ function clickBuy(what) {
     if (!item || !type) return;
     switch (type) {
         case "workers":
-            buyWorker(item, 1);
+            buyWorker(item, window.event.ctrlKey ? -1 : 1);
             break;
         case "buildings":
-            buyBuilding(item, 1);
+            buyBuilding(item, window.event.ctrlKey ? -1 : 1);
             break;
         case "upgrades":
             buyUpgrade(item);
@@ -993,12 +1062,13 @@ function gainResource(resource, number, active = false) {
  * @param {boolean} forFree Whether to get for free.
  */
 function buyWorker(worker, number, forFree = false) {
-    if (!worker || (!forFree && !canAfford(worker))) return;
+    if (!worker || (!forFree && number > 0 && !canAfford(worker)) || (worker.current + number) < worker.free) return;
     worker.current += number;
+    worker.top = Math.max(worker.current, worker.top);
     if (forFree) worker.free += number;
     if (worker.effect) worker.effect();
     for (var res in worker.resourceCost) {
-        if (forFree) break;
+        if (forFree || number < 1) break;
         var resource = getFromText(res);
         resource.current = prettify(resource.current - worker.resourceCost[res].current, 2);
         gainResource(getFromText(res + "P"), 0.001); //in case progress is maxed, reset automatically
@@ -1017,12 +1087,12 @@ function buyWorker(worker, number, forFree = false) {
  * @param {boolean} forFree Whether to get for free.
  */
 function buyBuilding(building, number, forFree = false) {
-    if (!building || (!forFree && !canAfford(building))) return;
+    if (!building || (!forFree && number > 0 && !canAfford(building)) || (building.current + number) < building.free) return;
     building.current += number;
     if (forFree) building.free += number;
     if (building.effect) building.effect();
     for (var res in building.resourceCost) {
-        if (forFree) break;
+        if (forFree || number < 1) break;
         var resource = getFromText(res);
         resource.current = prettify(resource.current - building.resourceCost[res].current, 2);
         gainResource(getFromText(res + "P"), 0.001); //in case progress is maxed, reset automatically
@@ -1084,7 +1154,7 @@ function buyLeader(leader) {
     if (leader.advCost) addAdvancementPoints(-leader.advCost);
     game.player.currentLeaders++;
     updateLeaderValues(leader, true);
-    leaderGreeting(leader);
+    leaderFirstGreeting(leader);
 }
 
 
@@ -2476,7 +2546,8 @@ function prestigeReset() {
             advancementPoints: (game.player.advancementPoints + game.player.nextAdvancementPoints),
             prestigePoints: (game.player.prestigePoints + game.player.nextPrestigePoints),
             prestigeUnlocked: true,
-            achievementPoints: game.player.achievementPoints
+            achievementPoints: game.player.achievementPoints,
+            doubleClick: game.player.doubleClick
         }
     };
     carryover.global = game.global;
@@ -2490,15 +2561,22 @@ function prestigeReset() {
             bought: game.upgrades.upgLeaders.bought
         }
     };
+    if (leadersUnlocked) {
+        carryover.leaders = game.leaders;
+        for (var ldr in leadersList) {
+            var leader = leadersList[ldr];
+            carryover.leaders[leader] = {
+                locked: game.leaders[leader].locked,
+                bought: false
+            };
+        }
+    }
 
     var loadString = LZString.compressToBase64(JSON.stringify(carryover));
     if (!load(loadString)) message("There was a problem with resetting the game.", "warning");
     applyPrestiges();
     if (game.player.colonies <= 1) tutorialMessage("prestige3");
     if (game.settings.skipFirstUpg) clickBuy("upgWater");
-    if (leadersUnlocked) {
-        unlock.apply(this, leadersList);
-    }
     message("A new colony was built: <b>" + game.player.empireName + "</b>.");
 
     if (!game.achievements.achColonist.achieved && game.player.colonies > 0) achieve("achColonist");
@@ -3438,6 +3516,9 @@ greetingMessage();
 //main game loop
 var loops = 0;
 setTimeout(gameTimeout, (1000 / game.global.speed));
+
+//inital setup
+firstSetup();
 
 //unhide body
 document.body.classList.remove("locked");
