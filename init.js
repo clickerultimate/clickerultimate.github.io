@@ -2,7 +2,7 @@ function newGame() {
     var initData = {
         global: {
             version: "0.2.07",
-            latestChanges: "Leaders now advise you on which advancements to get. Fancy graphics mode has been improved.",
+            latestChanges: "...",
             start: new Date().getTime(),
             time: 0,
             speed: 10,

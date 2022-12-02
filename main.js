@@ -399,8 +399,7 @@ function message(content, type) {
  * 
  * @param {object} leader The hired leader.
  */
-function leaderGreeting(leader) {
-    if (!leader) return;
+function leaderFirstGreeting(leader) {
     var messages = [];
     var empire = getEmpireLabel();
     var Empire = getEmpireLabel(true);
@@ -421,6 +420,58 @@ function leaderGreeting(leader) {
     }
 
     message("<b>" + leader.label + "</b>: \"" + getRandom(messages) + "\"");
+}
+
+/**
+ * A leader greets the player upon their return.
+ */
+function leaderGreeting() {
+    var leaderList = [];
+    for (var ldr in game.leaders) {
+        if (!game.leaders[ldr].bought) continue;
+        leaderList.push(game.leaders[ldr]);
+    }
+
+    if (leaderList.length < 1) return;
+
+    var greetings = [];
+    var reports = [];
+    var titles = ["Emperor", "My King", "Your Excellency", "Ruler", "sire", "Monarch", "Leader", "Your Highness", "Your Grace", "my liege", "my lord"];
+    var leader = getRandom(leaderList);
+    var title = getRandom(titles);
+    var Title = capitalize(title);
+    var empire = getEmpireLabel();
+    var Empire = getEmpireLabel(true);
+
+    switch (leader.personality) {
+        case "wise":
+            greetings = [`${capitalize(title)}, you return!`, `I hope your travels treated you well, ${title}.`, `Ahh ${title}, I was pondering when you would return to us.`];
+            break;
+        case "stern":
+            greetings = [`Godspeed ${title}.`, "Hail.", `${Title}!`, `Victory awaits, ${title}.`, `A triumphant return among us, ${title}.`, `${Title}, you're back!`];
+            break;
+        case "pious":
+            greetings = [`Blessings, ${title}.`, `You bless us with your return, ${title}?`, `Grace to you, ${title}.` `God bless, ${title}.`];
+            break;
+        default:
+            greetings = [`Hail, ${title}.`, `Greetings, ${title}.`, `Welcome back, ${title}.`, `${Title}.`];
+    }
+
+    switch (leader.personality) {
+        case "wise":
+            reports = ["Make haste, there is much to be done.", `${Empire} is in need of your guidance.`, `The people of ${empire} are in need of your guidance, ${title}.`, `Shall we tend to ${empire}?`];
+            break;
+        case "stern":
+            reports = ["Do you have orders for us?", `Still none dare stand before the might of ${empire}.`, "Say the word, and it shall be done.", `${Empire} stands at the ready.`];
+            break;
+        case "pious":
+            reports = [`God gracefully watched over ${empire} in your absence.`, `Thankfully, no harm was done to ${empire} while you were away.`, "If this pleases God, how may I be of use today?"];
+            break;
+        default:
+            reports = [`Nothing to report on ${empire} in your absence, ${title}.`, `${Empire} has prospered in your absence.`, `The people of ${empire} awaited your return.`];
+    }
+
+    message(`<b>${leader.label}</b>: "${getRandom(greetings)} ${getRandom(reports)}"`);
 }
 
 /**
@@ -618,7 +669,10 @@ function greetingMessage() {
             msg = "Welcome to Clicker Ultimate!"
     }
 
-    if (msg) message(msg);
+    if (msg) {
+        message(msg);
+        leaderGreeting();
+    }
 }
 
 /**
@@ -1100,7 +1154,7 @@ function buyLeader(leader) {
     if (leader.advCost) addAdvancementPoints(-leader.advCost);
     game.player.currentLeaders++;
     updateLeaderValues(leader, true);
-    leaderGreeting(leader);
+    leaderFirstGreeting(leader);
 }
 
 
