@@ -2546,7 +2546,8 @@ function prestigeReset() {
             advancementPoints: (game.player.advancementPoints + game.player.nextAdvancementPoints),
             prestigePoints: (game.player.prestigePoints + game.player.nextPrestigePoints),
             prestigeUnlocked: true,
-            achievementPoints: game.player.achievementPoints
+            achievementPoints: game.player.achievementPoints,
+            doubleClick: game.player.doubleClick
         }
     };
     carryover.global = game.global;

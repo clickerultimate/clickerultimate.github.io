@@ -4342,7 +4342,7 @@ function newGame() {
                 label: "Double Clicking",
                 type: "active",
                 description: function () {
-                    var rates = [50, 40, 30, 20, 15, 10, 5, 1];
+                    var rates = [50, 40, 30, 25, 20, 15, 10, 5];
                     var desc = "This mysterious artifact will occasionally boost your resource gathering. Will sometimes <b>double</b> the resource progress gathered when you click.";
                     if (this.level == 0) desc += " Double Clicking will occur every <b>" + rates[0] + " clicks</b>.";
                     else if (this.level < 8) desc += " Double Clicking rate will increase from every <b>" + rates[this.level - 1] + " clicks</b> to every <b>" + rates[this.level] + " clicks</b>.";
@@ -4356,10 +4356,11 @@ function newGame() {
                     ptgSoftTap: 4,
                     ptgMechanicalClicker: 2
                 },
-                effect: function (level) {
-                    var rates = [50, 40, 30, 20, 15, 10, 5, 1];
-                    game.player.doubleClick = this.level > 0 ? rates[this.level - 1] : 0;
+                effect: function () {
+                    var rates = [50, 40, 30, 25, 20, 15, 10, 5];
+                    game.player.doubleClick = rates[this.level];
                 },
+                oneTime: true,
                 bought: false
             },
             ptgMason: {
