@@ -544,7 +544,7 @@ function tutorialMessage(type) {
     if (!game.settings.tutorialEnabled) return;
 
     var tutorialMessages = {
-        available: ["resources", "upgrades", "levels", "ages", "buildings", "highprogress", "themes", "tax", "prestige2", "prestige3", "tutorial"],
+        available: ["resources", "upgrades", "levels", "ages", "buildings", "highprogress", "themes", "tax", "prestige2", "prestige3", "tutorial", "selling"],
         gather: "Click on the <b>Gather</b> button above to fill the Progress Bar of a resource. Doing so will grant you resources which you can use to buy things with.",
         workers: "You can hover over the tile of a <b>Worker</b> to see what it does and how much it costs. The more workers you have, the more their effects stack!",
         workers2: "Some <b>Workers</b> have a constant cost to some resources. Be sure to read their descriptions before buying them.",
@@ -566,7 +566,7 @@ function tutorialMessage(type) {
         leaders: "<b>Leaders</b> are unique characters with various benefits. It's worth mentioning you can only hire <b>one leader</b> for every colony you build, so better think twice before making your decision.",
         leaders2: "Don't be too eager to hire a <b>Leader</b>, as you will unlock more and more as your civilization progresses. As with other things, patience is a virtue.",
         leaders3: "<b>Leaders</b> you unlock stay available for hire on your subsequent colonies. Additionally, some <b>Leaders</b> can only be unlocked under special circumstances, so don't be afraid to experiment.",
-        selling: "You can sell <b>Workers</b> and <b>Buildings</b> by holding the ctrl key."
+        selling: "You can sell <b>Workers</b> and <b>Buildings</b> by holding the ctrl key before clicking on their respective button."
     };
 
     var item = type;
@@ -1010,6 +1010,7 @@ function gainResource(resource, number, active = false) {
 function buyWorker(worker, number, forFree = false) {
     if (!worker || (!forFree && number > 0 && !canAfford(worker)) || (worker.current + number) < worker.free) return;
     worker.current += number;
+    worker.top = Math.max(worker.current, worker.top);
     if (forFree) worker.free += number;
     if (worker.effect) worker.effect();
     for (var res in worker.resourceCost) {

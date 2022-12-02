@@ -260,6 +260,7 @@ function newGame() {
                 description: function () { return "A simple worker that carries water back to your stockage. A single worker gives you <b>Water Progress</b> at a rate of <b>" + this.resourceGain.waterP.base + " per second</b>."; },
                 current: 0,
                 free: 0,
+                top: 0,
                 resourceGain: {
                     waterP: {
                         base: 0.1
@@ -280,6 +281,7 @@ function newGame() {
                 description: function () { return "A simple worker that carries wood back to your stockage. A single worker gives you <b>Wood Progress</b> at a rate of <b>" + this.resourceGain.woodP.base + " per second</b>."; },
                 current: 0,
                 free: 0,
+                top: 0,
                 resourceGain: {
                     woodP: {
                         base: 0.2
@@ -312,6 +314,7 @@ function newGame() {
                 },
                 current: 0,
                 free: 0,
+                top: 0,
                 resourceGain: {
                     stoneP: {
                         base: 0.4
@@ -330,7 +333,7 @@ function newGame() {
                         rate: 1.35
                     }
                 },
-                effect: function () { if ((game.workers.waterFetcher.current - game.workers.waterFetcher.free) < 1 && (game.workers.lumberjack.current - game.workers.lumberjack.free) < 1) achieve("achCraven"); },
+                effect: function () { if ((game.workers.waterFetcher.top - game.workers.waterFetcher.free) < 1 && (game.workers.lumberjack.top - game.workers.lumberjack.free) < 1) achieve("achCraven"); },
                 locked: true
             },
             ironsmith: {
@@ -339,6 +342,7 @@ function newGame() {
                 description: function () { return "Experts in the extraction of <b>Iron</b>, these workers will work tirelessly, providing you a bonus of <b>" + this.resourceGain.ironP.base + " Iron Progress per second</b>."; },
                 current: 0,
                 free: 0,
+                top: 0,
                 resourceGain: {
                     ironP: {
                         base: 5
@@ -363,6 +367,7 @@ function newGame() {
                 description: function () { return "Farmers are an important workforce you likely couldn't do without. Each Farmer will supply <b>" + this.resourceGain.wheatP.base + " Wheat Progress per second</b>, but cost <b>" + Math.abs(this.resourceGain.water.base) + " Water per second</b>."; },
                 current: 0,
                 free: 0,
+                top: 0,
                 resourceGain: {
                     water: {
                         base: -0.2
@@ -390,6 +395,7 @@ function newGame() {
                 description: function () { return "Specialized worker who excels in the art of getting <b>Silver</b> from mines. Each Silversmith will supply <b>" + this.resourceGain.silverP.base + " Silver Progress per second</b>, but cost <b>" + Math.abs(this.resourceGain.stone.base) + " Stone per second</b> and <b>" + Math.abs(this.resourceGain.wheat.base) + " Wheat per second</b>."; },
                 current: 0,
                 free: 0,
+                top: 0,
                 resourceGain: {
                     stone: {
                         base: -0.2
@@ -423,6 +429,7 @@ function newGame() {
                 description: function () { return "Somewhat of a jack-of-all-trades, millers are crafty workers providing their own aspecy of the economy. Each Miller provides you with <b>" + this.resourceGain.waterP.base + " Water Progress per second</b> and <b>" + this.resourceGain.wheatP.base + " Wheat Progress per second</b>, but cost <b>" + Math.abs(this.resourceGain.woodP.base) + " Wood Progress per second</b>."; },
                 current: 0,
                 free: 0,
+                top: 0,
                 resourceGain: {
                     waterP: {
                         base: 0.4
@@ -448,6 +455,7 @@ function newGame() {
                 description: function () { return "Both a recluse and a nature lover, forresters repopulate forests through their care and patience. Each Forrester provides you with <b>" + this.resourceGain.woodP.base + " Wood Progress per second</b> and <b>" + this.resourceGain.stoneP.base + " Stone Progress per second</b>, but cost <b>" + Math.abs(this.resourceGain.wheatP.base) + " Wheat Progress per second</b>."; },
                 current: 0,
                 free: 0,
+                top: 0,
                 resourceGain: {
                     woodP: {
                         base: 0.2
@@ -473,6 +481,7 @@ function newGame() {
                 description: function () { return "A less useful and wimpier-looking version of a farmer. Has its uses. Each Farm Hand provides you with <b>" + this.resourceGain.wheatP.base + " Wheat Progress per second</b> at the cost of <b>" + Math.abs(this.resourceGain.waterP.base) + " Water Progress per second</b>."; },
                 current: 0,
                 free: 0,
+                top: 0,
                 resourceGain: {
                     waterP: {
                         base: -0.2
@@ -495,6 +504,7 @@ function newGame() {
                 description: function () { return "In more peaceful and prosperous times, the strangest of professions arise. Every Jeweler provides you with <b>" + this.resourceGain.silverP.base + " Silver Progress per second</b> at the cost of <b>" + Math.abs(this.resourceGain.stoneP.base) + " Stone Progress per second</b> and <b>" + Math.abs(this.resourceGain.ironP.base) + " Iron Progress per second</b>."; },
                 current: 0,
                 free: 0,
+                top: 0,
                 resourceGain: {
                     stoneP: {
                         base: -0.2
@@ -520,6 +530,7 @@ function newGame() {
                 description: function () { return "As devoted as they are faithful, monks will toil to each gather <b>Stone Progress</b> at a rate of <b>" + this.resourceGain.stoneP.base + " per second</b> as well as provide <b>" + this.resourceGain.water.base + " Water per second</b>."; },
                 current: 0,
                 free: 0,
+                top: 0,
                 resourceGain: {
                     water: {
                         base: 0.1
@@ -3674,6 +3685,7 @@ function newGame() {
                     upgradeMaxValue("stone", this.rate);
                     upgradeMaxValue("iron", this.rate);
                     upgradeMaxValue("wheat", this.rate);
+                    tutorialMessage("selling");
                     achieve("achDarkTimes");
                 },
                 locked: true,
@@ -4901,8 +4913,8 @@ function newGame() {
             achCraven: {
                 name: "achCraven",
                 label: "Craven",
-                description: function () { return "Hire your first <b>Miner</b> without having a single <b>Water Fetcher</b> or <b>Lumberjack</b> under your employ. Why would you do this?"; },
-                progress: function () { return (game.workers.waterFetcher.current - game.workers.waterFetcher.free) > 0 || (game.workers.lumberjack.current - game.workers.lumberjack.free) > 0 ? "You hired a water fetcher and/or a lumberjack." : "Miners: " + Math.min(game.workers.miner.current, 1) + "/1"; },
+                description: function () { return "Hire your first <b>Miner</b> without ever having a single <b>Water Fetcher</b> or <b>Lumberjack</b> under your employ. Why would you do this?"; },
+                progress: function () { return (game.workers.waterFetcher.top - game.workers.waterFetcher.free) > 0 || (game.workers.lumberjack.top - game.workers.lumberjack.free) > 0 ? "You hired a water fetcher and/or a lumberjack." : "Miners: " + Math.min(game.workers.miner.current, 1) + "/1"; },
                 points: 1,
                 hidden: false,
                 achieved: false
