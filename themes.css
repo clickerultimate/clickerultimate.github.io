@@ -309,6 +309,13 @@ hr {
     border-color: var(--buttonsBorder);
 }
 
+body.ctrlDown #WorkersContainer .jbButton,
+body.ctrlDown #WorkersContainer .jbButton .jbIndicator,
+body.ctrlDown #BuildingsContainer .jbButton,
+body.ctrlDown #BuildingsContainer .jbButton .jbIndicator{
+    color: var(--enabled);
+}
+
 .ptgInProgress .jbIndicator {
     color: var(--enabled);
 }

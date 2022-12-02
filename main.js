@@ -22,6 +22,20 @@ Turn millers into bakers with new age
 Add setting to automatically purchase free upgrades
 */
 
+function firstSetup() {
+    document.body.addEventListener('keydown', function (event) {
+        if (event.ctrlKey) {
+            document.body.classList.add("ctrlDown");
+        }
+    });
+
+    document.body.addEventListener('keyup', function (event) {
+        if (!event.ctrlKey) {
+            document.body.classList.remove("ctrlDown");
+        }
+    });
+}
+
 /**
  * Controls the flow of the game by calling the main game loop.
  */
@@ -551,7 +565,8 @@ function tutorialMessage(type) {
         tutorial: "You can disable these tips by switching the tutorial off in the Settings.",
         leaders: "<b>Leaders</b> are unique characters with various benefits. It's worth mentioning you can only hire <b>one leader</b> for every colony you build, so better think twice before making your decision.",
         leaders2: "Don't be too eager to hire a <b>Leader</b>, as you will unlock more and more as your civilization progresses. As with other things, patience is a virtue.",
-        leaders3: "<b>Leaders</b> you unlock stay available for hire on your subsequent colonies. Additionally, some <b>Leaders</b> can only be unlocked under special circumstances, so don't be afraid to experiment."
+        leaders3: "<b>Leaders</b> you unlock stay available for hire on your subsequent colonies. Additionally, some <b>Leaders</b> can only be unlocked under special circumstances, so don't be afraid to experiment.",
+        selling: "You can sell <b>Workers</b> and <b>Buildings</b> by holding the ctrl key."
     };
 
     var item = type;
@@ -993,7 +1008,7 @@ function gainResource(resource, number, active = false) {
  * @param {boolean} forFree Whether to get for free.
  */
 function buyWorker(worker, number, forFree = false) {
-    if (!worker || (!forFree && !canAfford(worker)) || (worker.current + number) < worker.free) return;
+    if (!worker || (!forFree && number > 0 && !canAfford(worker)) || (worker.current + number) < worker.free) return;
     worker.current += number;
     if (forFree) worker.free += number;
     if (worker.effect) worker.effect();
@@ -1017,7 +1032,7 @@ function buyWorker(worker, number, forFree = false) {
  * @param {boolean} forFree Whether to get for free.
  */
 function buyBuilding(building, number, forFree = false) {
-    if (!building || (!forFree && !canAfford(building)) || (building.current + number) < building.free) return;
+    if (!building || (!forFree && number > 0 && !canAfford(building)) || (building.current + number) < building.free) return;
     building.current += number;
     if (forFree) building.free += number;
     if (building.effect) building.effect();
@@ -3445,6 +3460,9 @@ greetingMessage();
 //main game loop
 var loops = 0;
 setTimeout(gameTimeout, (1000 / game.global.speed));
+
+//inital setup
+firstSetup();
 
 //unhide body
 document.body.classList.remove("locked");
