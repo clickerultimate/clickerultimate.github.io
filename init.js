@@ -2,7 +2,7 @@ function newGame() {
     var initData = {
         global: {
             version: "0.2.07",
-            latestChanges: "...",
+            latestChanges: "Added leader greetings & minor bug fixes",
             start: new Date().getTime(),
             time: 0,
             speed: 10,
